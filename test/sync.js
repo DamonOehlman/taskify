@@ -3,9 +3,8 @@ var assert = require('assert'),
     executed = [],
     a, b, c;
 
-function trackTask(callback) {
+function trackTask() {
     executed.push(this.name);
-    callback();
 }
 
 describe('depends tests', function() {
@@ -20,15 +19,6 @@ describe('depends tests', function() {
         // run a
         task.run('a', function(err) {
             // expect an error because we are missing module b
-            assert(err);
-            assert.equal(err.message, 'Task "b" not found');
-            done();
-        });
-    });
-
-    it('should be able to specify a dependency jake style', function(done) {
-        a = task('a', ['b'], trackTask);
-        task.run('a', function(err) {
             assert(err);
             assert.equal(err.message, 'Task "b" not found');
             done();

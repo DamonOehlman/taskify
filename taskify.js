@@ -1,6 +1,6 @@
 /*
  * taskify v0.0.00.0.0
- * build   => 2012-10-24T05:25:08.709Z
+ * build   => 2012-10-24T07:14:08.236Z
  * 
  * 
  *  
@@ -55,17 +55,35 @@
     };
     
     function taskify(name, opts, runner) {
-        var task;
+        var task, baseRunner;
     
         // handle the noopts case
         if (typeof opts == 'function') {
             runner = opts;
             opts = {};
         }
+        // if the opts is an array, we just have dependencies specified
+        else if (Array.isArray(opts)) {
+            opts = {
+                deps: opts
+            };
+        }
     
         // create the task instance
         // and save the new task instance to the registry
         task = registry[name] = new TaskInstance(name, opts);
+    
+        // ensure the runner is valid (i.e. has a callback, if not proxy one)
+        if (runner.length === 0) {
+            // save the original runner
+            baseRunner = runner;
+    
+            // supply the new runner
+            runner = function(callback) {
+                baseRunner.call(this);
+                callback();
+            };
+        }
     
         // bind the exec function to the runner instance
         task.runner = runner;
@@ -86,7 +104,9 @@
             if (err) return callback(err);
     
             // otherwise execute the task
-            task.runner.call(task, callback);
+            task.runner.call(task, function(err) {
+                return callback.apply(task, [err].concat(results));
+            });
         });
     };
     
