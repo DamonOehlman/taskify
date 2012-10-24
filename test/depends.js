@@ -1,6 +1,12 @@
 var assert = require('assert'),
     task = require('../'),
-    executed = [];
+    executed = [],
+    a, b, c;
+
+function trackTask(callback) {
+    executed.push(this.name);
+    callback();
+}
 
 describe('depends tests', function() {
     beforeEach(function() {
@@ -9,10 +15,7 @@ describe('depends tests', function() {
     });
 
     it('should be able to specify a dependency for a task', function(done) {
-        task('a', function(callback) {
-            executed.push(this.name);
-            callback();
-        }).depends('b');
+        a = task('a', { deps: ['b'] }, trackTask);
 
         // run a
         task.run('a', function(err) {
@@ -24,14 +27,33 @@ describe('depends tests', function() {
     });
 
     it('should be able to register task b, then run task a', function(done) {
-        task('b', function(callback) {
-            executed.push(this.name);
-            callback();
-        });
-
+        b = task('b', trackTask);
         task.run('a', function(err) {
             assert.ifError(err);
             assert.deepEqual(executed, ['b', 'a']);
+
+            done();
+        });
+    });
+
+    it('should be able to inject an additional dependency for b', function(done) {
+        c = task('c', trackTask);
+        b.depends('c');
+
+        task.run('a', function(err) {
+            assert.ifError(err);
+            assert.deepEqual(executed, ['c', 'b', 'a']);
+
+            done();
+        });
+    });
+
+    it('should reject a cyclic dependency', function(done) {
+        c.depends('c');
+
+        task.run('a', function(err) {
+            assert.ifError(err);
+            assert.deepEqual(executed, ['c', 'b', 'a']);
 
             done();
         });

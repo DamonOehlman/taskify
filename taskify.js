@@ -1,6 +1,6 @@
 /*
  * taskify v0.0.00.0.0
- * build   => 2012-10-24T05:14:47.676Z
+ * build   => 2012-10-24T05:25:08.709Z
  * 
  * 
  *  
@@ -39,8 +39,15 @@
         ## depends(names)
         */
         depends: function(names) {
+            var ownDep;
+    
             // add some dependencies
             this._deps = this._deps.concat(names || []).concat(Array.prototype.slice.call(arguments, 1));
+    
+            // remove any dependencies for this module name
+            while ((ownDep = this._deps.indexOf(this.name)) >= 0) {
+                this._deps.splice(ownDep, 1);
+            }
     
             // chaining goodness
             return this;
