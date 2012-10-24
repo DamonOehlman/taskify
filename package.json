@@ -1,0 +1,34 @@
+{
+  "name": "taskify",
+  "description": "Simple Atomic Task Definition for Node and the Browser",
+  "author": "Damon Oehlman <damon.oehlman@sidelab.com>",
+  "tags": [
+    "query",
+    "match",
+    "filter"
+  ],
+  "version": "0.0.0",
+  "main": "taskify.js",
+  "engines": {
+    "node": ">= 0.6.x < 0.9.0"
+  },
+  "dependencies": {
+    "async": "0.1.x"
+  },
+  "devDependencies": {
+    "expect.js": "0.1.x",
+    "mocha": "1.5.x"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/DamonOehlman/taskify.git"
+  },
+  "bugs": {
+    "url": "http://github.com/DamonOehlman/taskify/issues"
+  },
+  "scripts": {
+    "test": "./node_modules/.bin/mocha --reporter spec",
+    "build": "interleave -output ./"
+  },
+  "contributors": []
+}
