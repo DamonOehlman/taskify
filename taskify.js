@@ -1,6 +1,6 @@
 /*
  * taskify v0.0.00.0.0
- * build   => 2012-10-24T04:26:51.213Z
+ * build   => 2012-10-24T05:14:47.676Z
  * 
  * 
  *  
@@ -72,7 +72,7 @@
         var task = registry[target];
     
         // if the task is not found, then return an error
-        if (! task) return callback(new Error('Task not found'));
+        if (! task) return callback(new Error('Task "' + target + '" not found'));
     
         // run the dependent tasks first
         async.map(task._deps, taskify.run, function(err, results) {
