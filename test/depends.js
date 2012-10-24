@@ -3,9 +3,8 @@ var assert = require('assert'),
     executed = [],
     a, b, c;
 
-function trackTask(callback) {
+function trackTask() {
     executed.push(this.name);
-    callback();
 }
 
 describe('depends tests', function() {

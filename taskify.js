@@ -1,6 +1,6 @@
 /*
  * taskify v0.0.00.0.0
- * build   => 2012-10-24T07:14:08.236Z
+ * build   => 2012-10-24T07:29:02.741Z
  * 
  * 
  *  
@@ -32,9 +32,32 @@
     
         // initailise the dependencies to be an empty array
         this._deps = [].concat(opts.deps || []);
+    
+        // initialise async to false
+        this._completionListeners = null;
     }
     
     TaskInstance.prototype = {
+        /**
+        ## specify that the task should execute asynchronously
+        */
+        async: function() {
+            var task = this;
+    
+            // initialise the completion listeners array
+            this._completionListeners = [];
+    
+            // return the function to call 
+            return function() {
+                var args = arguments;
+    
+                // fire the completion listeners
+                task._completionListeners.forEach(function(listener) {
+                    listener.apply(task, args);
+                });
+            };
+        },
+    
         /**
         ## depends(names)
         */
@@ -73,18 +96,6 @@
         // and save the new task instance to the registry
         task = registry[name] = new TaskInstance(name, opts);
     
-        // ensure the runner is valid (i.e. has a callback, if not proxy one)
-        if (runner.length === 0) {
-            // save the original runner
-            baseRunner = runner;
-    
-            // supply the new runner
-            runner = function(callback) {
-                baseRunner.call(this);
-                callback();
-            };
-        }
-    
         // bind the exec function to the runner instance
         task.runner = runner;
     
@@ -104,9 +115,15 @@
             if (err) return callback(err);
     
             // otherwise execute the task
-            task.runner.call(task, function(err) {
-                return callback.apply(task, [err].concat(results));
-            });
+            task.runner.apply(task, results);
+    
+            // if the task has completion listeners, then bind
+            if (task._completionListeners) {
+                task._completionListeners.push(callback);
+            }
+            else {
+                callback.call(task);
+            }
         });
     };
     
