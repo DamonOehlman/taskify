@@ -1,6 +1,6 @@
 /*
  * taskify v0.0.00.0.0
- * build   => 2012-10-24T07:29:02.741Z
+ * build   => 2012-10-27T11:54:28.668Z
  * 
  * 
  *  
@@ -9,13 +9,13 @@
 // umdjs returnExports pattern: https://github.com/umdjs/umd/blob/master/returnExports.js
 (function (root, factory) {
     if (typeof exports === 'object') {
-        module.exports = factory(require('async'));
+        module.exports = factory(require('async'), require('underscore'));
     } else if (typeof define === 'function' && define.amd) {
-        define(['async'], factory);
+        define(['async', 'underscore'], factory);
     } else {
-        root['taskify'] = factory(root['async']);
+        root['taskify'] = factory(root['async'], root['underscore']);
     }
-}(this, function (async) {
+}(this, function (async, _) {
     
     // define the task registry
     var registry = {};
@@ -76,6 +76,47 @@
             return this;
         }
     };
+    /**
+    # ExecutionContext
+    */
+    function ExecutionContext() {
+        this.completed = {};
+    }
+    
+    ExecutionContext.prototype = {
+        /**
+        ## runTask(task, callback)
+    
+        The runTask method is used to run the task within the specified execution
+        context.  After the task has been completed, the context completed results
+        are saved to the completed member.
+        */
+        runTask: function(task, callback) {
+            var context = this,
+                runnerResult;
+    
+            function done(err) {
+                if (err) return callback(err);
+    
+                // save the result of the task to the completed results
+                context.completed[task.name] = typeof arguments[1] != 'undefined' ? arguments[1] : true;
+    
+                // fire the callback
+                callback.apply(task, arguments);
+            }
+    
+            // execute the task
+            runnerResult = task.runner.call(task, context);
+    
+            // if the task has completion listeners, then bind
+            if (task._completionListeners) {
+                task._completionListeners.push(done);
+            }
+            else {
+                done(null, runnerResult);
+            }
+        }
+    };
     
     function taskify(name, opts, runner) {
         var task, baseRunner;
@@ -103,27 +144,47 @@
         return task;
     }
     
-    taskify.run = function(target, callback) {
+    /**
+    ## taskify.reset
+    
+    Reset the registry - clear existing task definitions.
+    */
+    taskify.reset = function() {
+        // reset the registry
+        registry = {};
+    };
+    
+    taskify.run = function(context, target, callback) {
+        var task, runner, deps;
+    
+        // if the execution context is a string, then we don't have one
+        if (typeof context == 'string' || (context instanceof String)) {
+            callback = target;
+            target = context;
+            context = null;
+        }
+    
         // get the requested task from the registry
-        var task = registry[target];
+        task = registry[target];
     
         // if the task is not found, then return an error
         if (! task) return callback(new Error('Task "' + target + '" not found'));
     
+        // ensure we have an execution context
+        context = context || new ExecutionContext();
+    
+        // initialise the runner for depedendant tasks
+        runner = taskify.run.bind(null, context);
+    
+        // determine the actual deps (i.e. those task deps that have not already been run)
+        deps = _.without(task._deps, Object.keys(context.completed));
+    
         // run the dependent tasks first
-        async.map(task._deps, taskify.run, function(err, results) {
+        async.forEach(deps, runner, function(err) {
             if (err) return callback(err);
     
-            // otherwise execute the task
-            task.runner.apply(task, results);
-    
-            // if the task has completion listeners, then bind
-            if (task._completionListeners) {
-                task._completionListeners.push(callback);
-            }
-            else {
-                callback.call(task);
-            }
+            // get the execution context to run the task
+            context.runTask(task, callback);
         });
     };
     

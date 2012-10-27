@@ -1,64 +1,10 @@
-// req: async
+// req: async, underscore as _
 
 // define the task registry
 var registry = {};
 
-/**
-# TaskInstance
-*/
-function TaskInstance(name, opts) {
-    // ensure we have opts
-    opts = opts || {};
-
-    // initialise the task name
-    this.name = name;
-
-    // initailise the dependencies to be an empty array
-    this._deps = [].concat(opts.deps || []);
-
-    // initialise async to false
-    this._completionListeners = null;
-}
-
-TaskInstance.prototype = {
-    /**
-    ## specify that the task should execute asynchronously
-    */
-    async: function() {
-        var task = this;
-
-        // initialise the completion listeners array
-        this._completionListeners = [];
-
-        // return the function to call 
-        return function() {
-            var args = arguments;
-
-            // fire the completion listeners
-            task._completionListeners.forEach(function(listener) {
-                listener.apply(task, args);
-            });
-        };
-    },
-
-    /**
-    ## depends(names)
-    */
-    depends: function(names) {
-        var ownDep;
-
-        // add some dependencies
-        this._deps = this._deps.concat(names || []).concat(Array.prototype.slice.call(arguments, 1));
-
-        // remove any dependencies for this module name
-        while ((ownDep = this._deps.indexOf(this.name)) >= 0) {
-            this._deps.splice(ownDep, 1);
-        }
-
-        // chaining goodness
-        return this;
-    }
-};
+//= core/task
+//= core/context
 
 function taskify(name, opts, runner) {
     var task, baseRunner;
@@ -86,26 +32,46 @@ function taskify(name, opts, runner) {
     return task;
 }
 
-taskify.run = function(target, callback) {
+/**
+## taskify.reset
+
+Reset the registry - clear existing task definitions.
+*/
+taskify.reset = function() {
+    // reset the registry
+    registry = {};
+};
+
+taskify.run = function(context, target, callback) {
+    var task, runner, deps;
+
+    // if the execution context is a string, then we don't have one
+    if (typeof context == 'string' || (context instanceof String)) {
+        callback = target;
+        target = context;
+        context = null;
+    }
+
     // get the requested task from the registry
-    var task = registry[target];
+    task = registry[target];
 
     // if the task is not found, then return an error
     if (! task) return callback(new Error('Task "' + target + '" not found'));
 
+    // ensure we have an execution context
+    context = context || new ExecutionContext();
+
+    // initialise the runner for depedendant tasks
+    runner = taskify.run.bind(null, context);
+
+    // determine the actual deps (i.e. those task deps that have not already been run)
+    deps = _.without(task._deps, Object.keys(context.completed));
+
     // run the dependent tasks first
-    async.map(task._deps, taskify.run, function(err, results) {
+    async.forEach(deps, runner, function(err) {
         if (err) return callback(err);
 
-        // otherwise execute the task
-        task.runner.apply(task, results);
-
-        // if the task has completion listeners, then bind
-        if (task._completionListeners) {
-            task._completionListeners.push(callback);
-        }
-        else {
-            callback.call(task);
-        }
+        // get the execution context to run the task
+        context.runTask(task, callback);
     });
 };

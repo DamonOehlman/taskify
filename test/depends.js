@@ -8,6 +8,10 @@ function trackTask() {
 }
 
 describe('depends tests', function() {
+    before(function() {
+        task.reset();
+    });
+
     beforeEach(function() {
         // reset the executed tasks array
         executed = [];
