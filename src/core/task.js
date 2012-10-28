@@ -8,11 +8,11 @@ function TaskInstance(name, opts) {
     // initialise the task name
     this.name = name;
 
+    // initialise as not async
+    this.isAsync = false;
+
     // initailise the dependencies to be an empty array
     this._deps = [].concat(opts.deps || []);
-
-    // initialise async to false
-    this._completionListeners = null;
 }
 
 TaskInstance.prototype = {
@@ -20,20 +20,32 @@ TaskInstance.prototype = {
     ## specify that the task should execute asynchronously
     */
     async: function() {
-        var task = this;
-
-        // initialise the completion listeners array
-        this._completionListeners = [];
+        // flag as async
+        this.isAsync = true;
 
         // return the function to call 
-        return function() {
-            var args = arguments;
+        return this.complete.bind(this);
+    },
 
-            // fire the completion listeners
-            task._completionListeners.forEach(function(listener) {
-                listener.apply(task, args);
-            });
-        };
+    /**
+    ## complete
+    */
+    complete: function(err) {
+        var task = this,
+            args = Array.prototype.slice.call(arguments);
+
+        // if we have an execution context for the task, then update the results
+        // but only if we didn't receive an error
+        if (this.context && (! args[0])) {
+            this.context.completed[task.name] = args[1] || true;
+        }
+
+        setTimeout(function() {
+            eve.apply(null, ['task.complete.' + task.name, task].concat(args));
+
+            // clear the context
+            task.context = undefined;
+        }, 0);
     },
 
     /**
@@ -54,3 +66,9 @@ TaskInstance.prototype = {
         return this;
     }
 };
+
+['on', 'once'].forEach(function(bindingName) {
+    TaskInstance.prototype[bindingName] = function(eventName, handler) {
+        eve[bindingName]('task.' + eventName + '.' + this.name, handler);
+    };
+});

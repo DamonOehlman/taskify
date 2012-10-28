@@ -1,6 +1,6 @@
 /*
- * taskify v0.0.00.0.0
- * build   => 2012-10-27T11:54:28.668Z
+ * taskify v0.1.00.1.0
+ * build   => 2012-10-28T07:19:01.733Z
  * 
  * 
  *  
@@ -9,13 +9,13 @@
 // umdjs returnExports pattern: https://github.com/umdjs/umd/blob/master/returnExports.js
 (function (root, factory) {
     if (typeof exports === 'object') {
-        module.exports = factory(require('async'), require('underscore'));
+        module.exports = factory(require('async'), require('underscore'), require('eve'));
     } else if (typeof define === 'function' && define.amd) {
-        define(['async', 'underscore'], factory);
+        define(['async', 'underscore', 'eve'], factory);
     } else {
-        root['taskify'] = factory(root['async'], root['underscore']);
+        root['taskify'] = factory(root['async'], root['underscore'], root['eve']);
     }
-}(this, function (async, _) {
+}(this, function (async, _, eve) {
     
     // define the task registry
     var registry = {};
@@ -30,11 +30,11 @@
         // initialise the task name
         this.name = name;
     
+        // initialise as not async
+        this.isAsync = false;
+    
         // initailise the dependencies to be an empty array
         this._deps = [].concat(opts.deps || []);
-    
-        // initialise async to false
-        this._completionListeners = null;
     }
     
     TaskInstance.prototype = {
@@ -42,20 +42,32 @@
         ## specify that the task should execute asynchronously
         */
         async: function() {
-            var task = this;
-    
-            // initialise the completion listeners array
-            this._completionListeners = [];
+            // flag as async
+            this.isAsync = true;
     
             // return the function to call 
-            return function() {
-                var args = arguments;
+            return this.complete.bind(this);
+        },
     
-                // fire the completion listeners
-                task._completionListeners.forEach(function(listener) {
-                    listener.apply(task, args);
-                });
-            };
+        /**
+        ## complete
+        */
+        complete: function(err) {
+            var task = this,
+                args = Array.prototype.slice.call(arguments);
+    
+            // if we have an execution context for the task, then update the results
+            // but only if we didn't receive an error
+            if (this.context && (! args[0])) {
+                this.context.completed[task.name] = args[1] || true;
+            }
+    
+            setTimeout(function() {
+                eve.apply(null, ['task.complete.' + task.name, task].concat(args));
+    
+                // clear the context
+                task.context = undefined;
+            }, 0);
         },
     
         /**
@@ -76,46 +88,75 @@
             return this;
         }
     };
+    
+    ['on', 'once'].forEach(function(bindingName) {
+        TaskInstance.prototype[bindingName] = function(eventName, handler) {
+            eve[bindingName]('task.' + eventName + '.' + this.name, handler);
+        };
+    });
     /**
     # ExecutionContext
     */
-    function ExecutionContext() {
+    function ExecutionContext(registry) {
+        // save the registry copy for local reference
+        this.registry = registry  || {};
+    
+        // initialise the completed result container
         this.completed = {};
     }
     
-    ExecutionContext.prototype = {
-        /**
-        ## runTask(task, callback)
+    /**
+    ## exec(task, atgs)
     
-        The runTask method is used to run the task within the specified execution
-        context.  After the task has been completed, the context completed results
-        are saved to the completed member.
-        */
-        runTask: function(task, callback) {
-            var context = this,
-                runnerResult;
+    Execute the specified task passing the args to the runner
+    */
+    ExecutionContext.prototype.exec = function(target, args) {
+        var context = this,
     
-            function done(err) {
-                if (err) return callback(err);
+            // get the requested task from the registry
+            task = this.registry[target],
+            lastTask;
     
-                // save the result of the task to the completed results
-                context.completed[task.name] = typeof arguments[1] != 'undefined' ? arguments[1] : true;
+        // if the task is not found, then return an error
+        if (! task) return new Error('Task "' + target + '" not found');
     
-                // fire the callback
-                callback.apply(task, arguments);
+        // run the dependent tasks
+        async.forEach(
+            // determine the actual deps (i.e. those task deps that have not already been run)
+            _.without(task._deps, Object.keys(this.completed)),
+    
+            function(depname, itemCallback) {
+                // execute the child task
+                var childTask = context.exec(depname, args);
+    
+                // if we didn't get a child task, then trigger an error
+                if (childTask instanceof Error) {
+                    return itemCallback(childTask);
+                }
+                else {
+                    eve.once('task.complete.' + depname, itemCallback);
+                }
+            },
+    
+            function(err) {
+                var runnerResult;
+    
+                if (err) return task.complete(err);
+    
+                // set the execution context for the task
+                task.context = context;
+    
+                // execute the task
+                runnerResult = task.runner.call(task, context);
+    
+                // if the task is not async, then complete the task
+                if (! task.isAsync) {
+                    task.complete(null, runnerResult);
+                }
             }
+        );
     
-            // execute the task
-            runnerResult = task.runner.call(task, context);
-    
-            // if the task has completion listeners, then bind
-            if (task._completionListeners) {
-                task._completionListeners.push(done);
-            }
-            else {
-                done(null, runnerResult);
-            }
-        }
+        return task;
     };
     
     function taskify(name, opts, runner) {
@@ -154,38 +195,14 @@
         registry = {};
     };
     
-    taskify.run = function(context, target, callback) {
-        var task, runner, deps;
+    /**
+    ## taskify.run
+    */
+    taskify.run = function(target) {
+        var args = Array.prototype.slice.call(arguments, 1);
     
-        // if the execution context is a string, then we don't have one
-        if (typeof context == 'string' || (context instanceof String)) {
-            callback = target;
-            target = context;
-            context = null;
-        }
-    
-        // get the requested task from the registry
-        task = registry[target];
-    
-        // if the task is not found, then return an error
-        if (! task) return callback(new Error('Task "' + target + '" not found'));
-    
-        // ensure we have an execution context
-        context = context || new ExecutionContext();
-    
-        // initialise the runner for depedendant tasks
-        runner = taskify.run.bind(null, context);
-    
-        // determine the actual deps (i.e. those task deps that have not already been run)
-        deps = _.without(task._deps, Object.keys(context.completed));
-    
-        // run the dependent tasks first
-        async.forEach(deps, runner, function(err) {
-            if (err) return callback(err);
-    
-            // get the execution context to run the task
-            context.runTask(task, callback);
-        });
+        // create the execution context, passing the task registry
+        return new ExecutionContext(_.clone(registry)).exec(target, args);
     };
     
     return typeof taskify != 'undefined' ? taskify : undefined;

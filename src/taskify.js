@@ -1,4 +1,4 @@
-// req: async, underscore as _
+// req: async, underscore as _, eve
 
 // define the task registry
 var registry = {};
@@ -42,36 +42,12 @@ taskify.reset = function() {
     registry = {};
 };
 
-taskify.run = function(context, target, callback) {
-    var task, runner, deps;
+/**
+## taskify.run
+*/
+taskify.run = function(target) {
+    var args = Array.prototype.slice.call(arguments, 1);
 
-    // if the execution context is a string, then we don't have one
-    if (typeof context == 'string' || (context instanceof String)) {
-        callback = target;
-        target = context;
-        context = null;
-    }
-
-    // get the requested task from the registry
-    task = registry[target];
-
-    // if the task is not found, then return an error
-    if (! task) return callback(new Error('Task "' + target + '" not found'));
-
-    // ensure we have an execution context
-    context = context || new ExecutionContext();
-
-    // initialise the runner for depedendant tasks
-    runner = taskify.run.bind(null, context);
-
-    // determine the actual deps (i.e. those task deps that have not already been run)
-    deps = _.without(task._deps, Object.keys(context.completed));
-
-    // run the dependent tasks first
-    async.forEach(deps, runner, function(err) {
-        if (err) return callback(err);
-
-        // get the execution context to run the task
-        context.runTask(task, callback);
-    });
+    // create the execution context, passing the task registry
+    return new ExecutionContext(_.clone(registry)).exec(target, args);
 };

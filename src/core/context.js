@@ -1,41 +1,64 @@
 /**
 # ExecutionContext
 */
-function ExecutionContext() {
+function ExecutionContext(registry) {
+    // save the registry copy for local reference
+    this.registry = registry  || {};
+
+    // initialise the completed result container
     this.completed = {};
 }
 
-ExecutionContext.prototype = {
-    /**
-    ## runTask(task, callback)
+/**
+## exec(task, atgs)
 
-    The runTask method is used to run the task within the specified execution
-    context.  After the task has been completed, the context completed results
-    are saved to the completed member.
-    */
-    runTask: function(task, callback) {
-        var context = this,
-            runnerResult;
+Execute the specified task passing the args to the runner
+*/
+ExecutionContext.prototype.exec = function(target, args) {
+    var context = this,
 
-        function done(err) {
-            if (err) return callback(err);
+        // get the requested task from the registry
+        task = this.registry[target],
+        lastTask;
 
-            // save the result of the task to the completed results
-            context.completed[task.name] = typeof arguments[1] != 'undefined' ? arguments[1] : true;
+    // if the task is not found, then return an error
+    if (! task) return new Error('Task "' + target + '" not found');
 
-            // fire the callback
-            callback.apply(task, arguments);
+    // run the dependent tasks
+    async.forEach(
+        // determine the actual deps (i.e. those task deps that have not already been run)
+        _.without(task._deps, Object.keys(this.completed)),
+
+        function(depname, itemCallback) {
+            // execute the child task
+            var childTask = context.exec(depname, args);
+
+            // if we didn't get a child task, then trigger an error
+            if (childTask instanceof Error) {
+                return itemCallback(childTask);
+            }
+            else {
+                eve.once('task.complete.' + depname, itemCallback);
+            }
+        },
+
+        function(err) {
+            var runnerResult;
+
+            if (err) return task.complete(err);
+
+            // set the execution context for the task
+            task.context = context;
+
+            // execute the task
+            runnerResult = task.runner.call(task, context);
+
+            // if the task is not async, then complete the task
+            if (! task.isAsync) {
+                task.complete(null, runnerResult);
+            }
         }
+    );
 
-        // execute the task
-        runnerResult = task.runner.call(task, context);
-
-        // if the task has completion listeners, then bind
-        if (task._completionListeners) {
-            task._completionListeners.push(done);
-        }
-        else {
-            done(null, runnerResult);
-        }
-    }
+    return task;
 };
