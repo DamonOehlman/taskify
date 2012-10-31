@@ -3,8 +3,8 @@
  * Simple Atomic Task Definition for Node and the Browser
  * 
  * -meta---
- * version:    0.1.1
- * builddate:  2012-10-31T00:55:08.012Z
+ * version:    0.1.2
+ * builddate:  2012-10-31T04:20:48.720Z
  * generator:  interleave@0.5.23
  * 
  * 
@@ -189,6 +189,15 @@
         // return the task instance
         return task;
     }
+    
+    /**
+    ## taskify.get
+    
+    Get a task by name
+    */
+    taskify.get = function(taskName) {
+        return registry[taskName];
+    };
     
     /**
     ## taskify.reset

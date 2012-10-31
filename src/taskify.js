@@ -33,6 +33,15 @@ function taskify(name, opts, runner) {
 }
 
 /**
+## taskify.get
+
+Get a task by name
+*/
+taskify.get = function(taskName) {
+    return registry[taskName];
+};
+
+/**
 ## taskify.reset
 
 Reset the registry - clear existing task definitions.
