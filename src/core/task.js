@@ -32,12 +32,13 @@ TaskInstance.prototype = {
     */
     complete: function(err) {
         var task = this,
-            args = Array.prototype.slice.call(arguments);
+            args = Array.prototype.slice.call(arguments),
+            taskResult = args.length > 2 ? args.slice(1) : args[1];
 
         // if we have an execution context for the task, then update the results
         // but only if we didn't receive an error
-        if (this.context && (! args[0])) {
-            this.context.completed[task.name] = args[1] || true;
+        if (this.name && this.context && (! args[0])) {
+            this.context.results[this.name] = taskResult || true;
         }
 
         setTimeout(function() {

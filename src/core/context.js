@@ -6,7 +6,7 @@ function ExecutionContext(registry) {
     this.registry = registry  || {};
 
     // initialise the completed result container
-    this.completed = {};
+    this.results = {};
 }
 
 /**
@@ -32,7 +32,7 @@ ExecutionContext.prototype.exec = function(target, args) {
     // run the dependent tasks
     async.forEach(
         // determine the actual deps (i.e. those task deps that have not already been run)
-        _.without(task._deps, Object.keys(this.completed)),
+        _.without(task._deps, Object.keys(this.results)),
 
         function(depname, itemCallback) {
             // execute the child task

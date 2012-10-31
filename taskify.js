@@ -4,7 +4,7 @@
  * 
  * -meta---
  * version:    0.2.0
- * builddate:  2012-10-31T09:18:51.529Z
+ * builddate:  2012-10-31T09:42:13.305Z
  * generator:  interleave@0.5.23
  * 
  * 
@@ -59,12 +59,13 @@
         */
         complete: function(err) {
             var task = this,
-                args = Array.prototype.slice.call(arguments);
+                args = Array.prototype.slice.call(arguments),
+                taskResult = args.length > 2 ? args.slice(1) : args[1];
     
             // if we have an execution context for the task, then update the results
             // but only if we didn't receive an error
-            if (this.context && (! args[0])) {
-                this.context.completed[task.name] = args[1] || true;
+            if (this.name && this.context && (! args[0])) {
+                this.context.results[this.name] = taskResult || true;
             }
     
             setTimeout(function() {
@@ -107,7 +108,7 @@
         this.registry = registry  || {};
     
         // initialise the completed result container
-        this.completed = {};
+        this.results = {};
     }
     
     /**
@@ -133,7 +134,7 @@
         // run the dependent tasks
         async.forEach(
             // determine the actual deps (i.e. those task deps that have not already been run)
-            _.without(task._deps, Object.keys(this.completed)),
+            _.without(task._deps, Object.keys(this.results)),
     
             function(depname, itemCallback) {
                 // execute the child task

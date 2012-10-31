@@ -11,6 +11,7 @@ describe('async execution tests', function() {
         setTimeout(this.async(), 50);
     }
 
+    before(task.reset);
     beforeEach(function() {
         // reset the executed tasks array
         executed = [];
