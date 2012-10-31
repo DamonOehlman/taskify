@@ -1,5 +1,5 @@
 var assert = require('assert'),
-    task = require('../'),
+    task = require('../taskify'),
     executed = [],
     a, b, c;
 

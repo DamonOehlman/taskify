@@ -1,0 +1,34 @@
+<html>
+  <head>
+    <title>Mocha</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" href="mocha.css" />
+  </head>
+  <body>
+    <div id="mocha"></div>
+    <script src="mocha.js"></script>
+    <script>mocha.setup('bdd')</script>
+    <script>
+    var reLastPart = /.*\/(.*)$/;
+
+    function require(module) {
+        return window[module
+          .replace('underscore', '_')
+          .replace(/\.js/, '')
+          .replace(reLastPart, '$1')
+      ];
+    }
+    </script>
+    <script src="https://raw.github.com/LearnBoost/expect.js/master/expect.js"></script>
+    <script src="https://raw.github.com/DmitryBaranovskiy/eve/master/eve.js"></script>
+    <script src="https://raw.github.com/documentcloud/underscore/master/underscore.js"></script>
+    <script src="https://raw.github.com/caolan/async/master/lib/async.js"></script>
+    <script>var underscore = _;</script>
+    <script src="../../taskify.js"></script>
+    <script src="../async.js"></script>
+    <script src="../depends.js"></script>
+    <script>
+    mocha.run();
+    </script>
+  </body>
+</html>

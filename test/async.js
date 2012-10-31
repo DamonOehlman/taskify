@@ -2,7 +2,7 @@ describe('async execution tests', function() {
     var expect = require('expect.js'),
         eve = require('eve'),
         _ = require('underscore'),
-        task = require('../'),
+        task = require('../taskify'),
         executed = [],
         a, b, c;
 
