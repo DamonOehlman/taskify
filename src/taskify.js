@@ -4,7 +4,8 @@
 var registry = {},
     taskCounter = 1;
 
-//= core/task
+//= core/taskdef
+//= core/taskproxy
 //= core/context
 
 function taskify(name, opts, runner) {
@@ -24,7 +25,7 @@ function taskify(name, opts, runner) {
 
     // create the task instance
     // and save the new task instance to the registry
-    task = registry[name] = new TaskInstance(name, opts);
+    task = registry[name] = new TaskDefinition(name, opts);
 
     // bind the exec function to the runner instance
     task.runner = runner;
@@ -54,7 +55,7 @@ taskify.select = function(target) {
 
     // create a temporary task definition with deps on the specified target(s)
     // TODO: generate a UUID for the task
-    tmpTask = new TaskInstance(taskCounter, { deps: [].concat(target || [])});
+    tmpTask = new TaskDefinition('ghost' + taskCounter, { deps: [].concat(target || [])});
 
     // increment the task counter
     taskCounter += 1;

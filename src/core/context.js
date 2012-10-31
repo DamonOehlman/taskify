@@ -16,18 +16,21 @@ Execute the specified task passing the args to the runner
 */
 ExecutionContext.prototype.exec = function(target, args) {
     var context = this,
-        task, lastTask;
+        task, lastTask, proxy;
 
     // get the task from the registry (if not a task itself)
     if (typeof target == 'string' || (target instanceof String)) {
         task = this.registry[target];
     }
-    else if (target instanceof TaskInstance) {
+    else if (target instanceof TaskDefinition) {
         task = target;
     }
 
     // if the task is not found, then return an error
     if (! task) return new Error('Task "' + target + '" not found');
+
+    // create a task proxy
+    proxy = new TaskProxy(task, this);
 
     // run the dependent tasks
     async.forEach(
@@ -50,22 +53,19 @@ ExecutionContext.prototype.exec = function(target, args) {
         function(err) {
             var runnerResult;
 
-            if (err) return task.complete(err);
-
-            // set the execution context for the task
-            task.context = context;
+            if (err) return proxy.complete(err);
 
             // execute the task
             if (typeof task.runner == 'function') {
-                runnerResult = task.runner.apply(task, args);
+                runnerResult = task.runner.apply(proxy, args);
             }
 
             // if the task is not async, then complete the task
-            if (! task.isAsync) {
-                task.complete.apply(task, [null].concat(runnerResult || []));
+            if (! proxy.isAsync) {
+                proxy.complete.apply(proxy, [null].concat(runnerResult || []));
             }
         }
     );
 
-    return task;
+    return proxy;
 };

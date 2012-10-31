@@ -4,7 +4,7 @@
  * 
  * -meta---
  * version:    0.2.3
- * builddate:  2012-10-31T13:27:47.909Z
+ * builddate:  2012-10-31T23:05:21.445Z
  * generator:  interleave@0.5.23
  * 
  * 
@@ -27,9 +27,9 @@
         taskCounter = 1;
     
     /**
-    # TaskInstance
+    # TaskDefinition
     */
-    function TaskInstance(name, opts) {
+    function TaskDefinition(name, opts) {
         // ensure we have opts
         opts = opts || {};
     
@@ -43,7 +43,48 @@
         this._deps = [].concat(opts.deps || []);
     }
     
-    TaskInstance.prototype = {
+    TaskDefinition.prototype = {
+        /**
+        ## depends(names)
+        */
+        depends: function(names) {
+            var ownDep;
+    
+            // add some dependencies
+            this._deps = this._deps.concat(names || []).concat(Array.prototype.slice.call(arguments, 1));
+    
+            // remove any dependencies for this module name
+            while ((ownDep = this._deps.indexOf(this.name)) >= 0) {
+                this._deps.splice(ownDep, 1);
+            }
+    
+            // chaining goodness
+            return this;
+        }
+    };
+    var proxyCounter = 1;
+    
+    /**
+    # TaskProxy
+    
+    The TaskProxy provides access to the TaskDefinition information but provides state
+    isolation during task execution. 
+    */
+    function TaskProxy(def, context) {
+        // save a reference to the definition
+        this.def = def;
+    
+        // save a reference to the execution context
+        this.context = context;
+    
+        // initialize the isAsync flag to false
+        this.isAsync = false;
+    
+        // initialise the proxy count id
+        this._id = proxyCounter++;
+    }
+    
+    TaskProxy.prototype = {
         /**
         ## specify that the task should execute asynchronously
         */
@@ -70,35 +111,38 @@
             }
     
             setTimeout(function() {
-                eve.apply(null, ['task.complete.' + task.name, task].concat(args));
-    
-                // clear the context
-                task.context = undefined;
+                eve.apply(null, ['task.complete.' + task.id, task].concat(args));
             }, 0);
-        },
-    
-        /**
-        ## depends(names)
-        */
-        depends: function(names) {
-            var ownDep;
-    
-            // add some dependencies
-            this._deps = this._deps.concat(names || []).concat(Array.prototype.slice.call(arguments, 1));
-    
-            // remove any dependencies for this module name
-            while ((ownDep = this._deps.indexOf(this.name)) >= 0) {
-                this._deps.splice(ownDep, 1);
-            }
-    
-            // chaining goodness
-            return this;
         }
     };
     
+    /**
+    ## @id
+    
+    The id property is used to return the unique id for the task proxy.  The id is the initially generated
+    combined prefixed with the definition name.  For instance if the TaskDefinition name is `test` and the
+    `_id` generated for the proxy is 1, then the `id` property will return `test.1`
+    */
+    Object.defineProperty(TaskProxy.prototype, 'id', {
+        get: function() {
+            return this.def.name + '.' + this._id;
+        }
+    });
+    
+    /**
+    ## @name
+    
+    The name property is used to proxy the definition name to the proxy
+    */
+    Object.defineProperty(TaskProxy.prototype, 'name', {
+        get: function() {
+            return this.def.name;
+        }
+    });
+    
     ['on', 'once'].forEach(function(bindingName) {
-        TaskInstance.prototype[bindingName] = function(eventName, handler) {
-            eve[bindingName]('task.' + eventName + '.' + this.name, handler);
+        TaskProxy.prototype[bindingName] = function(eventName, handler) {
+            eve[bindingName]('task.' + eventName + '.' + this.id, handler);
         };
     });
     /**
@@ -119,18 +163,21 @@
     */
     ExecutionContext.prototype.exec = function(target, args) {
         var context = this,
-            task, lastTask;
+            task, lastTask, proxy;
     
         // get the task from the registry (if not a task itself)
         if (typeof target == 'string' || (target instanceof String)) {
             task = this.registry[target];
         }
-        else if (target instanceof TaskInstance) {
+        else if (target instanceof TaskDefinition) {
             task = target;
         }
     
         // if the task is not found, then return an error
         if (! task) return new Error('Task "' + target + '" not found');
+    
+        // create a task proxy
+        proxy = new TaskProxy(task, this);
     
         // run the dependent tasks
         async.forEach(
@@ -153,24 +200,21 @@
             function(err) {
                 var runnerResult;
     
-                if (err) return task.complete(err);
-    
-                // set the execution context for the task
-                task.context = context;
+                if (err) return proxy.complete(err);
     
                 // execute the task
                 if (typeof task.runner == 'function') {
-                    runnerResult = task.runner.apply(task, args);
+                    runnerResult = task.runner.apply(proxy, args);
                 }
     
                 // if the task is not async, then complete the task
-                if (! task.isAsync) {
-                    task.complete.apply(task, [null].concat(runnerResult || []));
+                if (! proxy.isAsync) {
+                    proxy.complete.apply(proxy, [null].concat(runnerResult || []));
                 }
             }
         );
     
-        return task;
+        return proxy;
     };
     
     function taskify(name, opts, runner) {
@@ -190,7 +234,7 @@
     
         // create the task instance
         // and save the new task instance to the registry
-        task = registry[name] = new TaskInstance(name, opts);
+        task = registry[name] = new TaskDefinition(name, opts);
     
         // bind the exec function to the runner instance
         task.runner = runner;
@@ -220,7 +264,7 @@
     
         // create a temporary task definition with deps on the specified target(s)
         // TODO: generate a UUID for the task
-        tmpTask = new TaskInstance(taskCounter, { deps: [].concat(target || [])});
+        tmpTask = new TaskDefinition('ghost' + taskCounter, { deps: [].concat(target || [])});
     
         // increment the task counter
         taskCounter += 1;
