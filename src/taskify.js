@@ -55,8 +55,13 @@ taskify.reset = function() {
 ## taskify.run
 */
 taskify.run = function(target) {
-    var args = Array.prototype.slice.call(arguments, 1);
+    var context = new ExecutionContext(_.clone(registry)),
+        args = Array.prototype.slice.call(arguments, 1),
+        tmpTask;
 
-    // create the execution context, passing the task registry
-    return new ExecutionContext(_.clone(registry)).exec(target, args);
+    // create a temporary task definition with deps on the specified target(s)
+    tmpTask = new TaskInstance('', { deps: [].concat(target || [])});
+
+    // execute the task with the specified args
+    return context.exec(tmpTask, args);
 };

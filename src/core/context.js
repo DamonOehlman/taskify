@@ -16,10 +16,15 @@ Execute the specified task passing the args to the runner
 */
 ExecutionContext.prototype.exec = function(target, args) {
     var context = this,
+        task, lastTask;
 
-        // get the requested task from the registry
-        task = this.registry[target],
-        lastTask;
+    // get the task from the registry (if not a task itself)
+    if (typeof target == 'string' || (target instanceof String)) {
+        task = this.registry[target];
+    }
+    else if (target instanceof TaskInstance) {
+        task = target;
+    }
 
     // if the task is not found, then return an error
     if (! task) return new Error('Task "' + target + '" not found');
@@ -51,7 +56,9 @@ ExecutionContext.prototype.exec = function(target, args) {
             task.context = context;
 
             // execute the task
-            runnerResult = task.runner.call(task, context);
+            if (typeof task.runner == 'function') {
+                runnerResult = task.runner.call(task, context);
+            }
 
             // if the task is not async, then complete the task
             if (! task.isAsync) {

@@ -3,8 +3,8 @@
  * Simple Atomic Task Definition for Node and the Browser
  * 
  * -meta---
- * version:    0.1.2
- * builddate:  2012-10-31T04:20:48.720Z
+ * version:    0.2.0
+ * builddate:  2012-10-31T09:18:51.529Z
  * generator:  interleave@0.5.23
  * 
  * 
@@ -117,10 +117,15 @@
     */
     ExecutionContext.prototype.exec = function(target, args) {
         var context = this,
+            task, lastTask;
     
-            // get the requested task from the registry
-            task = this.registry[target],
-            lastTask;
+        // get the task from the registry (if not a task itself)
+        if (typeof target == 'string' || (target instanceof String)) {
+            task = this.registry[target];
+        }
+        else if (target instanceof TaskInstance) {
+            task = target;
+        }
     
         // if the task is not found, then return an error
         if (! task) return new Error('Task "' + target + '" not found');
@@ -152,7 +157,9 @@
                 task.context = context;
     
                 // execute the task
-                runnerResult = task.runner.call(task, context);
+                if (typeof task.runner == 'function') {
+                    runnerResult = task.runner.call(task, context);
+                }
     
                 // if the task is not async, then complete the task
                 if (! task.isAsync) {
@@ -213,10 +220,15 @@
     ## taskify.run
     */
     taskify.run = function(target) {
-        var args = Array.prototype.slice.call(arguments, 1);
+        var context = new ExecutionContext(_.clone(registry)),
+            args = Array.prototype.slice.call(arguments, 1),
+            tmpTask;
     
-        // create the execution context, passing the task registry
-        return new ExecutionContext(_.clone(registry)).exec(target, args);
+        // create a temporary task definition with deps on the specified target(s)
+        tmpTask = new TaskInstance('', { deps: [].concat(target || [])});
+    
+        // execute the task with the specified args
+        return context.exec(tmpTask, args);
     };
     
     return typeof taskify != 'undefined' ? taskify : undefined;
