@@ -2,6 +2,8 @@
 
 This is a simple task execution helper that is heavily influenced from [jake](https://github.com/mde/jake) and [grunt](https://github.com/gruntjs/grunt).  It's kind of like jake but without the build goodies, and designed to work in the browser as well as node.
 
+<a href="http://travis-ci.org/#!/DamonOehlman/taskify"><img src="https://secure.travis-ci.org/DamonOehlman/taskify.png" alt="Build Status"></a>
+
 ## Example Usage
 
 Define a task `a`:
