@@ -62,7 +62,7 @@ ExecutionContext.prototype.exec = function(target, args) {
 
             // if the task is not async, then complete the task
             if (! task.isAsync) {
-                task.complete(null, runnerResult);
+                task.complete.apply(task, [null].concat(runnerResult || []));
             }
         }
     );
