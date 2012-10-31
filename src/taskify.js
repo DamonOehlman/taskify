@@ -1,7 +1,8 @@
 // req: async, underscore as _, eve
 
 // define the task registry
-var registry = {};
+var registry = {},
+    taskCounter = 1;
 
 //= core/task
 //= core/context
@@ -57,10 +58,14 @@ taskify.reset = function() {
 taskify.run = function(target) {
     var context = new ExecutionContext(_.clone(registry)),
         args = Array.prototype.slice.call(arguments, 1),
-        tmpTask;
+        deps, tmpTask;
 
     // create a temporary task definition with deps on the specified target(s)
-    tmpTask = new TaskInstance('', { deps: [].concat(target || [])});
+    // TODO: generate a UUID for the task
+    tmpTask = new TaskInstance(taskCounter, { deps: [].concat(target || [])});
+
+    // increment the task counter
+    taskCounter += 1;
 
     // execute the task with the specified args
     return context.exec(tmpTask, args);
