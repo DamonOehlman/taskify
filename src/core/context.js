@@ -57,7 +57,7 @@ ExecutionContext.prototype.exec = function(target, args) {
 
             // execute the task
             if (typeof task.runner == 'function') {
-                runnerResult = task.runner.call(task, context);
+                runnerResult = task.runner.apply(task, args);
             }
 
             // if the task is not async, then complete the task

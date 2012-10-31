@@ -4,7 +4,7 @@
  * 
  * -meta---
  * version:    0.2.2
- * builddate:  2012-10-31T12:53:40.275Z
+ * builddate:  2012-10-31T13:13:55.862Z
  * generator:  interleave@0.5.23
  * 
  * 
@@ -160,7 +160,7 @@
     
                 // execute the task
                 if (typeof task.runner == 'function') {
-                    runnerResult = task.runner.call(task, context);
+                    runnerResult = task.runner.apply(task, args);
                 }
     
                 // if the task is not async, then complete the task
