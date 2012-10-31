@@ -5,6 +5,12 @@ var assert = require('assert'),
     app = tako();
 
 describe('http server PoC tests', function() {
+    before(task.reset);
+
+    after(function(done) {
+        app.httpServer.close(done);
+    });
+
     it('should be able to define a task handling requests', function() {
         task('sayHello', function(req, res) {
             res.end('hi');
@@ -23,6 +29,27 @@ describe('http server PoC tests', function() {
         request.get('http://localhost:3000/hi', function(err, res, body) {
             assert.ifError(err);
             assert.equal(body, 'hi');
+
+            done();
+        });
+    });
+
+    it('should be able to define a series of tasks that will participate in the request', function() {
+        task('second', ['first'], function(req, res) {
+            res.end('2');
+        });
+
+        task('first', function(req, res) {
+            res.write('1');
+        });
+
+        app.route('/12', task.select('second')).methods('GET');
+    });
+
+    it('should be able to get the combined response from the tasks', function(done) {
+        request.get('http://localhost:3000/12', function(err, res, body) {
+            assert.ifError(err);
+            assert.equal(body, '12');
 
             done();
         });
