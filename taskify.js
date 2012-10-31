@@ -3,8 +3,8 @@
  * Simple Atomic Task Definition for Node and the Browser
  * 
  * -meta---
- * version:    0.2.0
- * builddate:  2012-10-31T09:42:13.305Z
+ * version:    0.2.1
+ * builddate:  2012-10-31T10:25:17.801Z
  * generator:  interleave@0.5.23
  * 
  * 
@@ -23,7 +23,8 @@
 }(this, function (async, _, eve) {
     
     // define the task registry
-    var registry = {};
+    var registry = {},
+        taskCounter = 1;
     
     /**
     # TaskInstance
@@ -164,7 +165,7 @@
     
                 // if the task is not async, then complete the task
                 if (! task.isAsync) {
-                    task.complete(null, runnerResult);
+                    task.complete.apply(task, [null].concat(runnerResult || []));
                 }
             }
         );
@@ -223,10 +224,14 @@
     taskify.run = function(target) {
         var context = new ExecutionContext(_.clone(registry)),
             args = Array.prototype.slice.call(arguments, 1),
-            tmpTask;
+            deps, tmpTask;
     
         // create a temporary task definition with deps on the specified target(s)
-        tmpTask = new TaskInstance('', { deps: [].concat(target || [])});
+        // TODO: generate a UUID for the task
+        tmpTask = new TaskInstance(taskCounter, { deps: [].concat(target || [])});
+    
+        // increment the task counter
+        taskCounter += 1;
     
         // execute the task with the specified args
         return context.exec(tmpTask, args);

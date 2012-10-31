@@ -41,7 +41,7 @@ describe('async execution tests', function() {
     it('should be able to register task b, then run task a', function(done) {
         b = task('b', trackTask);
         task.run('a').once('complete', function(err) {
-            expect(err).to.be(null);
+            expect(err).to.not.be.ok();
             expect(executed).to.eql(['b', 'a']);
 
             done();
@@ -53,7 +53,7 @@ describe('async execution tests', function() {
         b.depends('c');
 
         task.run('a').once('complete', function(err) {
-            expect(err).to.be(null);
+            expect(err).to.not.be.ok();
             expect(executed).to.eql(['c', 'b', 'a']);
 
             done();
@@ -64,7 +64,7 @@ describe('async execution tests', function() {
         c.depends('c');
 
         task.run('a').once('complete', function(err) {
-            expect(err).to.be(null);
+            expect(err).to.not.be.ok();
             expect(executed).to.eql(['c', 'b', 'a']);
 
             done();
