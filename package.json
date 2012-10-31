@@ -18,7 +18,9 @@
   },
   "devDependencies": {
     "expect.js": "0.1.x",
-    "mocha": "1.6.x"
+    "mocha": "1.6.x",
+    "request": "2.11.x",
+    "tako": "git://github.com/mikeal/tako.git"
   },
   "repository": {
     "type": "git",
