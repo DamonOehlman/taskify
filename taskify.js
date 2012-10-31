@@ -1,9 +1,14 @@
-/*
- * taskify v0.1.00.1.0
- * build   => 2012-10-28T07:19:01.733Z
+/* ~taskify~
+ * 
+ * Simple Atomic Task Definition for Node and the Browser
+ * 
+ * -meta---
+ * version:    0.1.1
+ * builddate:  2012-10-31T00:55:08.012Z
+ * generator:  interleave@0.5.23
  * 
  * 
- *  
+ * 
  */ 
 
 // umdjs returnExports pattern: https://github.com/umdjs/umd/blob/master/returnExports.js

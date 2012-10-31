@@ -1,16 +1,16 @@
-var assert = require('assert'),
-    eve = require('eve'),
-    task = require('../'),
-    executed = [],
-    a, b, c;
-
-function trackTask() {
-    executed.push(this.name);
-
-    setTimeout(this.async(), 50);
-}
-
 describe('async execution tests', function() {
+    var expect = require('expect.js'),
+        eve = require('eve'),
+        _ = require('underscore'),
+        task = require('../'),
+        executed = [],
+        a, b, c;
+
+    function trackTask() {
+        executed.push(this.name);
+        setTimeout(this.async(), 50);
+    }
+
     beforeEach(function() {
         // reset the executed tasks array
         executed = [];
@@ -22,8 +22,8 @@ describe('async execution tests', function() {
         // run a
         task.run('a').once('complete', function(err) {
             // expect an error because we are missing module b
-            assert(err);
-            assert.equal(err.message, 'Task "b" not found');
+            expect(err).to.be.ok();
+            expect(err.message).to.equal('Task "b" not found');
             done();
         });
     });
@@ -31,8 +31,8 @@ describe('async execution tests', function() {
     it('should be able to specify a dependency jake style', function(done) {
         a = task('a', ['b'], trackTask);
         task.run('a').once('complete', function(err) {
-            assert(err);
-            assert.equal(err.message, 'Task "b" not found');
+            expect(err).to.be.ok();
+            expect(err.message).to.equal('Task "b" not found');
             done();
         });
     });
@@ -40,8 +40,8 @@ describe('async execution tests', function() {
     it('should be able to register task b, then run task a', function(done) {
         b = task('b', trackTask);
         task.run('a').once('complete', function(err) {
-            assert.ifError(err);
-            assert.deepEqual(executed, ['b', 'a']);
+            expect(err).to.be(undefined);
+            expect(executed).to.eql(['b', 'a']);
 
             done();
         });
@@ -52,8 +52,8 @@ describe('async execution tests', function() {
         b.depends('c');
 
         task.run('a').once('complete', function(err) {
-            assert.ifError(err);
-            assert.deepEqual(executed, ['c', 'b', 'a']);
+            expect(err).to.be(undefined);
+            expect(executed).to.eql(['c', 'b', 'a']);
 
             done();
         });
@@ -63,8 +63,8 @@ describe('async execution tests', function() {
         c.depends('c');
 
         task.run('a').once('complete', function(err) {
-            assert.ifError(err);
-            assert.deepEqual(executed, ['c', 'b', 'a']);
+            expect(err).to.be(undefined);
+            expect(executed).to.eql(['c', 'b', 'a']);
 
             done();
         });
