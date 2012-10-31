@@ -7,7 +7,7 @@
     "match",
     "filter"
   ],
-  "version": "0.1.1",
+  "version": "0.1.2",
   "main": "taskify.js",
   "engines": {
     "node": ">= 0.6.x < 0.9.0"
