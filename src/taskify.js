@@ -43,6 +43,29 @@ taskify.get = function(taskName) {
 };
 
 /**
+## taskify.select
+
+Prepare task(s) to execute, returning a function that will accept arguments
+that will be passed through to the tasks
+*/
+taskify.select = function(target) {
+    var context = new ExecutionContext(_.clone(registry)),
+        deps, tmpTask;
+
+    // create a temporary task definition with deps on the specified target(s)
+    // TODO: generate a UUID for the task
+    tmpTask = new TaskInstance(taskCounter, { deps: [].concat(target || [])});
+
+    // increment the task counter
+    taskCounter += 1;
+
+    return function() {
+        // execute the task with the specified args
+        return context.exec(tmpTask, Array.prototype.slice.call(arguments));
+    };
+};
+
+/**
 ## taskify.reset
 
 Reset the registry - clear existing task definitions.
@@ -56,17 +79,5 @@ taskify.reset = function() {
 ## taskify.run
 */
 taskify.run = function(target) {
-    var context = new ExecutionContext(_.clone(registry)),
-        args = Array.prototype.slice.call(arguments, 1),
-        deps, tmpTask;
-
-    // create a temporary task definition with deps on the specified target(s)
-    // TODO: generate a UUID for the task
-    tmpTask = new TaskInstance(taskCounter, { deps: [].concat(target || [])});
-
-    // increment the task counter
-    taskCounter += 1;
-
-    // execute the task with the specified args
-    return context.exec(tmpTask, args);
+    return taskify.select(target).apply(null, Array.prototype.slice.call(arguments, 1));
 };
