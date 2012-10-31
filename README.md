@@ -7,7 +7,7 @@ This is a simple task execution helper that is heavily influenced from [jake](ht
 Define a task `a`:
 
 ```js
-task('a', function() {
+taskify('a', function() {
     console.log('a'); 
 });
 ```
@@ -15,7 +15,7 @@ task('a', function() {
 Then define another task that relies on task `a`:
 
 ```js
-task('b', ['a'], function() {
+taskify('b', ['a'], function() {
     console.log('b'); 
 });
 ```
@@ -23,7 +23,7 @@ task('b', ['a'], function() {
 Run task b:
 
 ```js
-task.run('b');
+taskify.run('b');
 ```
 
 Which would generate the following output:
@@ -38,7 +38,7 @@ b
 Specifying that a task handler behaves asynchronously is very similar to the way you would do this in a grunt task:
 
 ```js
-task('c', function() {
+taskify('c', function() {
     // call the async method of the task (passed to the runner as this)
     var done = this.async(); 
 
@@ -54,7 +54,33 @@ task('c', function() {
 Or a slightly less contrived example:
 
 ```js
-task('load-data', function() {
+taskify('load-data', function() {
     fs.readFile(path.resolve('data.txt'), 'utf8', this.async()); 
 });
 ```
+
+## Capturing Result Data
+
+When you call the `taskify.run` function, Taskify it creates a new [ExecutionContext](https://github.com/DamonOehlman/taskify/blob/master/src/core/context.js) for the task dependency tree that will be executed.  This execution context is not persistent though and only lasts until the requested tasks have completed their execution (or you capture the reference).
+
+To capture the results of a task execution you will need to handle the complete event for a particular task.  Let's look at the simple example of our `load-data` task from before:
+
+```js
+taskify.run('load-data').on('complete', function(err) {
+    if (err) return;
+
+    console.log('loaded data: '  + this.context.results['load-data']); 
+});
+```
+
+Additionally, because Taskify uses [eve](https://github.com/DmitryBaranovskiy/eve) under the hood for eventing, you can implement eve handlers to capture the complete events also:
+
+```js
+eve.on('task.complete.load-data', function(err) {
+    if (err) return;
+
+    console.log('loaded data: '  + this.context.results['load-data']); 
+});
+```
+
+__NOTE:__ The eve namespace for events is `task.` rather than `taskify.` as usually I find mapping to task requires a little less typing.  Additionally, I usually do something like `var task = require('taskify');`...
