@@ -63,7 +63,7 @@ taskify('load-data', function() {
 
 ## Capturing Result Data
 
-When you call the `taskify.run` function, Taskify it creates a new [ExecutionContext](https://github.com/DamonOehlman/taskify/blob/master/src/core/context.js) for the task dependency tree that will be executed.  This execution context is not persistent though and only lasts until the requested tasks have completed their execution (or you capture the reference).
+When you call the `taskify.run` function, Taskify creates a new [ExecutionContext](https://github.com/DamonOehlman/taskify/blob/master/src/core/context.js) for the task dependency tree that will be executed.  This execution context is not persistent though and only lasts until the requested tasks have completed their execution (or you capture the reference).
 
 To capture the results of a task execution you will need to handle the complete event for a particular task.  Let's look at the simple example of our `load-data` task from before:
 
@@ -86,3 +86,23 @@ eve.on('task.complete.load-data', function(err) {
 ```
 
 __NOTE:__ The eve namespace for events is `task.` rather than `taskify.` as usually I find mapping to task requires a little less typing.  Additionally, I usually do something like `var task = require('taskify');`...
+
+## Experimental Use Case: Handling HTTP Requests without Middleware
+
+While this was not one of the reasons I created Taskify, it is something I experimented with as a way of resolving preconditions for a particular route handler.  While most web frameworks implement middleware to handle things like cookie or body parsing Taskify can offer an alternative approach.
+
+For instance, consider the following example implementing using [Tako](https://github.com/mikeal/tako) and [cookies](https://github.com/jed/cookies):
+
+```js
+var tako = require('tako'),
+    task = require('taskify'),
+    Cookies = require('cookies')
+    app = tako();
+
+// define a task to extract cookies and place on the context
+task('auth', function(req, res) {
+    this.context.cookies = new Cookies(req, res);    
+});
+
+// define a
+

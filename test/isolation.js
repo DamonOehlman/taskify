@@ -64,4 +64,8 @@ describe('execution context isolation tests', function() {
     it('should generate seperate contexts for asynchronous tasks running in parallel', function(done) {
         runTasks(30, done, 'async');
     });
+
+    it('should generate separate context for a mix of async and sync tasks running parallel', function(done) {
+        runTasks(30, done, 'sync', 'async');
+    });
 });

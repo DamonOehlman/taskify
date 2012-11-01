@@ -3,8 +3,8 @@
  * Simple Atomic Task Definition for Node and the Browser
  * 
  * -meta---
- * version:    0.2.3
- * builddate:  2012-10-31T23:05:21.445Z
+ * version:    0.3.0
+ * builddate:  2012-11-01T01:33:27.255Z
  * generator:  interleave@0.5.23
  * 
  * 
@@ -106,7 +106,7 @@
     
             // if we have an execution context for the task, then update the results
             // but only if we didn't receive an error
-            if (this.name && this.context && (! args[0])) {
+            if (this.name && this.context && (! err)) {
                 this.context.results[this.name] = taskResult || true;
             }
     
@@ -193,12 +193,15 @@
                     return itemCallback(childTask);
                 }
                 else {
-                    eve.once('task.complete.' + depname, itemCallback);
+                    childTask.once('complete', function() {
+                        itemCallback.apply(this, arguments);
+                    });
                 }
             },
     
             function(err) {
-                var runnerResult;
+                var runnerResult,
+                    runnerErr = null;
     
                 if (err) return proxy.complete(err);
     
@@ -207,9 +210,16 @@
                     runnerResult = task.runner.apply(proxy, args);
                 }
     
+                // if the runner result is an error, then use it as the error
+                // and undefine the runnerResult
+                if (runnerResult instanceof Error) {
+                    runnerErr = runnerResult;
+                    runnerResult = undefined;
+                }
+    
                 // if the task is not async, then complete the task
                 if (! proxy.isAsync) {
-                    proxy.complete.apply(proxy, [null].concat(runnerResult || []));
+                    proxy.complete.apply(proxy, [runnerErr].concat(runnerResult || []));
                 }
             }
         );

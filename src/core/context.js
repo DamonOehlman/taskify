@@ -46,12 +46,15 @@ ExecutionContext.prototype.exec = function(target, args) {
                 return itemCallback(childTask);
             }
             else {
-                eve.once('task.complete.' + depname, itemCallback);
+                childTask.once('complete', function() {
+                    itemCallback.apply(this, arguments);
+                });
             }
         },
 
         function(err) {
-            var runnerResult;
+            var runnerResult,
+                runnerErr = null;
 
             if (err) return proxy.complete(err);
 
@@ -60,9 +63,16 @@ ExecutionContext.prototype.exec = function(target, args) {
                 runnerResult = task.runner.apply(proxy, args);
             }
 
+            // if the runner result is an error, then use it as the error
+            // and undefine the runnerResult
+            if (runnerResult instanceof Error) {
+                runnerErr = runnerResult;
+                runnerResult = undefined;
+            }
+
             // if the task is not async, then complete the task
             if (! proxy.isAsync) {
-                proxy.complete.apply(proxy, [null].concat(runnerResult || []));
+                proxy.complete.apply(proxy, [runnerErr].concat(runnerResult || []));
             }
         }
     );

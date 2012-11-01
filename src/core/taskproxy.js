@@ -42,7 +42,7 @@ TaskProxy.prototype = {
 
         // if we have an execution context for the task, then update the results
         // but only if we didn't receive an error
-        if (this.name && this.context && (! args[0])) {
+        if (this.name && this.context && (! err)) {
             this.context.results[this.name] = taskResult || true;
         }
 
