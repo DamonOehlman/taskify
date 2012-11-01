@@ -24,7 +24,7 @@ describe('eve event capture', function() {
     it('should be able to register task b, then run task a', function(done) {
         b = task('b', trackTask);
 
-        eve.once('task.complete.a', function(err) {
+        eve.once('taskify.complete.a', function(err) {
             expect(err).to.not.be.ok();
             expect(executed).to.eql(['b', 'a']);
 
@@ -38,7 +38,7 @@ describe('eve event capture', function() {
         c = task('c', trackTask);
         b.depends('c');
 
-        eve.once('task.complete.a', function(err) {
+        eve.once('taskify.complete.a', function(err) {
             expect(err).to.not.be.ok();
             expect(executed).to.eql(['c', 'b', 'a']);
 

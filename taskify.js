@@ -3,8 +3,8 @@
  * Simple Atomic Task Definition for Node and the Browser
  * 
  * -meta---
- * version:    0.3.2
- * builddate:  2012-11-01T04:21:02.861Z
+ * version:    0.3.3
+ * builddate:  2012-11-01T04:26:25.044Z
  * generator:  interleave@0.5.23
  * 
  * 
@@ -139,7 +139,7 @@
             }
     
             setTimeout(function() {
-                eve.apply(null, ['task.complete.' + task.id, task].concat(args));
+                eve.apply(null, ['taskify.complete.' + task.id, task].concat(args));
             }, 0);
         }
     };
@@ -181,7 +181,7 @@
     
     ['on', 'once'].forEach(function(bindingName) {
         TaskProxy.prototype[bindingName] = function(eventName, handler) {
-            eve[bindingName]('task.' + eventName + '.' + this.id, handler);
+            eve[bindingName]('taskify.' + eventName + '.' + this.id, handler);
         };
     });
     /**

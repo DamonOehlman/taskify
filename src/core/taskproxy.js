@@ -71,7 +71,7 @@ TaskProxy.prototype = {
         }
 
         setTimeout(function() {
-            eve.apply(null, ['task.complete.' + task.id, task].concat(args));
+            eve.apply(null, ['taskify.complete.' + task.id, task].concat(args));
         }, 0);
     }
 };
@@ -113,6 +113,6 @@ Object.defineProperty(TaskProxy.prototype, 'name', {
 
 ['on', 'once'].forEach(function(bindingName) {
     TaskProxy.prototype[bindingName] = function(eventName, handler) {
-        eve[bindingName]('task.' + eventName + '.' + this.id, handler);
+        eve[bindingName]('taskify.' + eventName + '.' + this.id, handler);
     };
 });

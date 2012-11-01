@@ -78,14 +78,34 @@ taskify.run('load-data').on('complete', function(err) {
 Additionally, because Taskify uses [eve](https://github.com/DmitryBaranovskiy/eve) under the hood for eventing, you can implement eve handlers to capture the complete events also:
 
 ```js
-eve.on('task.complete.load-data', function(err) {
+eve.on('taskify.complete.load-data', function(err) {
     if (err) return;
 
     console.log('loaded data: '  + this.context.results['load-data']); 
 });
 ```
 
-__NOTE:__ The eve namespace for events is `task.` rather than `taskify.` as usually I find mapping to task requires a little less typing.  Additionally, I usually do something like `var task = require('taskify');`...
+## Argument Passing
+
+When running a task using the `taskify.run` function (or by running the bound function returned from a `taskify.select`) call, you can supply arguments that will be passed to that task handler **and** all precondition tasks.
+
+As an example, let's pass `console.log` as a task handler:
+
+```js
+taskify('log', console.log);
+```
+
+And then run the task passing through the message arguments:
+
+```js
+taskify.run('log', 'Hi there', { test: true });
+```
+
+This would generate the following output:
+
+```
+Hi there { test: true }
+```
 
 ## Experimental Use Case: Handling HTTP Requests without Middleware
 
