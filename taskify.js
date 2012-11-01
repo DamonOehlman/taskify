@@ -3,8 +3,8 @@
  * Simple Atomic Task Definition for Node and the Browser
  * 
  * -meta---
- * version:    0.3.3
- * builddate:  2012-11-01T04:26:25.044Z
+ * version:    0.3.4
+ * builddate:  2012-11-01T06:14:21.345Z
  * generator:  interleave@0.5.23
  * 
  * 
