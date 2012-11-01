@@ -3,8 +3,8 @@ var taskify = require('../'),
     assert = require('assert');
 
 describe('taskify loader tests', function() {
-    it('should be able to load tasks from a specified directory', function(done) {
-        taskify.loadTasks(path.resolve(__dirname, 'test-tasks')).once('scanned', done);
+    it('should be able to load tasks from a specified directory', function() {
+        taskify.loadTasks(path.resolve(__dirname, 'test-tasks'));
     });
 
     it('should have loaded task a', function() {
