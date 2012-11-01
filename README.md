@@ -91,18 +91,58 @@ __NOTE:__ The eve namespace for events is `task.` rather than `taskify.` as usua
 
 While this was not one of the reasons I created Taskify, it is something I experimented with as a way of resolving preconditions for a particular route handler.  While most web frameworks implement middleware to handle things like cookie or body parsing Taskify can offer an alternative approach.
 
-For instance, consider the following example implementing using [Tako](https://github.com/mikeal/tako) and [cookies](https://github.com/jed/cookies):
+For instance, consider the following example implementing using [Tako](https://github.com/mikeal/tako). The example defines an `auth` task that can be specified as a precondition for a task that would require user awareness.  
+
+The great thing here is that the execution path for a simple request handler does not need to be passed through unnecessary middleware, but only through tasks that have been specifically defined as preconditions (or preconditions of preconditions) of the route handler.
 
 ```js
 var tako = require('tako'),
-    task = require('taskify'),
-    Cookies = require('cookies')
-    app = tako();
+    taskify = require('taskify'),
+    app = tako(),
+    knownUsers = {
+        DamonOehlman: {
+            name: 'Damon Oehlman',
+            twitterHandle: 'DamonOehlman'
+        }
+    };
 
-// define a task to extract cookies and place on the context
-task('auth', function(req, res) {
-    this.context.cookies = new Cookies(req, res);    
+// define the authenticator task
+taskify('auth', function(req, res) {
+    // inspect the req headers
+    var userId = req.headers['x-user-id'];
+
+    // check that the user is within the list of know 
+    if (! knownUsers[userId]) return new Error('A known user is required');
+
+    // add the user to the context
+    this.context.user = knownUsers[userId];
 });
 
-// define a
+// define a task that tells us the twitter handle of the user
+taskify('writeHandle', ['auth'], function(req, res) {
+    res.end(this.context.user.twitterHandle);
+});
 
+// define a task that says hi
+taskify('sayHi', function(req, res) {
+    res.end('hi');
+});
+
+taskify('reportError', function(req, res) {
+    res.end('error: ' + this.context.errors[0].message);
+});
+
+// set the default fallback
+taskify.defaults({
+    fallback: 'reportError'
+});
+
+// wire up the application routes
+app.route('/hi', taskify.select('sayHi'));
+app.route('/handle', taskify.select('writeHandle'));
+
+// start the server
+app.httpServer.listen(3000);
+```
+
+Something to note is that the above example makes use of the `taskify.select` function which returns a function reference that can be used to execute the task.  The arguments passed to this function reference are then passed through to all the task runners.  In this way it is fairly simple to use Taskify to handle http requests using most lightweight node web frameworks.
