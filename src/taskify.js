@@ -2,7 +2,8 @@
 
 // define the task registry
 var registry = {},
-    taskCounter = 1;
+    taskCounter = 1,
+    _defaults = {};
 
 //= core/taskdef
 //= core/taskproxy

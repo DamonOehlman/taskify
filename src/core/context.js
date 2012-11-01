@@ -30,7 +30,7 @@ ExecutionContext.prototype.exec = function(target, args) {
     if (! task) return new Error('Task "' + target + '" not found');
 
     // create a task proxy
-    proxy = new TaskProxy(task, this);
+    proxy = new TaskProxy(task, this, args);
 
     // run the dependent tasks
     async.forEach(

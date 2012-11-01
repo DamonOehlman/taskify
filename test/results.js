@@ -14,7 +14,7 @@ describe('results capture tests', function() {
 
     it('should be able to capture the results from the task execution', function(done) {
         task.run('a').once('complete', function(err) {
-            expect(err).to.be(null);
+            expect(err).to.not.be.ok();
 
             expect(this.context.results).to.be.ok();
             expect(this.context.results.a).to.be.equal(5);
@@ -30,7 +30,7 @@ describe('results capture tests', function() {
 
     it('should capture the new result after task execution', function(done) {
         task.run('a').once('complete', function(err) {
-            expect(err).to.be(null);
+            expect(err).to.not.be.ok();
 
             expect(this.context.results).to.be.ok();
             expect(this.context.results.a).to.be.equal(10);
@@ -50,7 +50,7 @@ describe('results capture tests', function() {
 
     it('should be able to capture the async result of the task execution', function(done) {
         task.run('a').once('complete', function(err) {
-            expect(err).to.be(null);
+            expect(err).to.not.be.ok();
 
             expect(this.context.results).to.be.ok();
             expect(this.context.results.a).to.be.equal(5);
@@ -70,7 +70,7 @@ describe('results capture tests', function() {
 
     it('should be able to capture multiple results passed through the async done call as an array', function(done) {
         task.run('a').once('complete', function(err) {
-            expect(err).to.be(null);
+            expect(err).to.not.be.ok();
 
             expect(this.context.results).to.be.ok();
             expect(this.context.results.a).to.be.eql([5, 10]);
@@ -86,7 +86,7 @@ describe('results capture tests', function() {
 
     it('should be able to exec b (depends on a) and capture both results', function(done) {
         task.run('b').once('complete', function(err) {
-            expect(err).to.be(null);
+            expect(err).to.not.be.ok();
 
             expect(this.context.results).to.be.ok();
             expect(this.context.results.a).to.be.eql([5, 10]);

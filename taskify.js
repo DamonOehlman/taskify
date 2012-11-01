@@ -3,8 +3,8 @@
  * Simple Atomic Task Definition for Node and the Browser
  * 
  * -meta---
- * version:    0.3.0
- * builddate:  2012-11-01T01:33:27.255Z
+ * version:    0.3.1
+ * builddate:  2012-11-01T02:00:27.964Z
  * generator:  interleave@0.5.23
  * 
  * 
@@ -24,7 +24,8 @@
     
     // define the task registry
     var registry = {},
-        taskCounter = 1;
+        taskCounter = 1,
+        _defaults = {};
     
     /**
     # TaskDefinition
@@ -40,7 +41,10 @@
         this.isAsync = false;
     
         // initailise the dependencies to be an empty array
-        this._deps = [].concat(opts.deps || []);
+        this._deps = _.uniq([].concat(opts.deps || []).concat(_defaults.deps || []));
+    
+        // allow a fallback task to be specified
+        this._fallback = opts.fallback || _defaults.fallback;
     }
     
     TaskDefinition.prototype = {
@@ -70,12 +74,15 @@
     The TaskProxy provides access to the TaskDefinition information but provides state
     isolation during task execution. 
     */
-    function TaskProxy(def, context) {
+    function TaskProxy(def, context, execArgs) {
         // save a reference to the definition
         this.def = def;
     
         // save a reference to the execution context
         this.context = context;
+    
+        // save the exec args
+        this.execArgs = execArgs || [];
     
         // initialize the isAsync flag to false
         this.isAsync = false;
@@ -102,7 +109,19 @@
         complete: function(err) {
             var task = this,
                 args = Array.prototype.slice.call(arguments),
-                taskResult = args.length > 2 ? args.slice(1) : args[1];
+                taskResult = args.length > 2 ? args.slice(1) : args[1],
+                fallbackProxy;
+    
+            // if we hit an error, and we have a callback, then run the fallback
+            if (err && this.fallback) {
+                fallbackProxy = this.context.exec(this.fallback, this.execArgs);
+    
+                // when the fallback task completes, run the completion event
+                fallbackProxy.on('complete', task.complete.bind(task));
+    
+                // prevent further execution
+                return;
+            }
     
             // if we have an execution context for the task, then update the results
             // but only if we didn't receive an error
@@ -126,6 +145,17 @@
     Object.defineProperty(TaskProxy.prototype, 'id', {
         get: function() {
             return this.def.name + '.' + this._id;
+        }
+    });
+    
+    /**
+    ## @fallback
+    
+    Return the fallback task specified in the task definition
+    */
+    Object.defineProperty(TaskProxy.prototype, 'fallback', {
+        get: function() {
+            return this.def._fallback;
         }
     });
     
@@ -177,7 +207,7 @@
         if (! task) return new Error('Task "' + target + '" not found');
     
         // create a task proxy
-        proxy = new TaskProxy(task, this);
+        proxy = new TaskProxy(task, this, args);
     
         // run the dependent tasks
         async.forEach(

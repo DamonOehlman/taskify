@@ -12,7 +12,10 @@ function TaskDefinition(name, opts) {
     this.isAsync = false;
 
     // initailise the dependencies to be an empty array
-    this._deps = [].concat(opts.deps || []);
+    this._deps = _.uniq([].concat(opts.deps || []).concat(_defaults.deps || []));
+
+    // allow a fallback task to be specified
+    this._fallback = opts.fallback || _defaults.fallback;
 }
 
 TaskDefinition.prototype = {

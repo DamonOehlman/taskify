@@ -6,12 +6,15 @@ var proxyCounter = 1;
 The TaskProxy provides access to the TaskDefinition information but provides state
 isolation during task execution. 
 */
-function TaskProxy(def, context) {
+function TaskProxy(def, context, execArgs) {
     // save a reference to the definition
     this.def = def;
 
     // save a reference to the execution context
     this.context = context;
+
+    // save the exec args
+    this.execArgs = execArgs || [];
 
     // initialize the isAsync flag to false
     this.isAsync = false;
@@ -38,7 +41,19 @@ TaskProxy.prototype = {
     complete: function(err) {
         var task = this,
             args = Array.prototype.slice.call(arguments),
-            taskResult = args.length > 2 ? args.slice(1) : args[1];
+            taskResult = args.length > 2 ? args.slice(1) : args[1],
+            fallbackProxy;
+
+        // if we hit an error, and we have a callback, then run the fallback
+        if (err && this.fallback) {
+            fallbackProxy = this.context.exec(this.fallback, this.execArgs);
+
+            // when the fallback task completes, run the completion event
+            fallbackProxy.on('complete', task.complete.bind(task));
+
+            // prevent further execution
+            return;
+        }
 
         // if we have an execution context for the task, then update the results
         // but only if we didn't receive an error
@@ -62,6 +77,17 @@ combined prefixed with the definition name.  For instance if the TaskDefinition 
 Object.defineProperty(TaskProxy.prototype, 'id', {
     get: function() {
         return this.def.name + '.' + this._id;
+    }
+});
+
+/**
+## @fallback
+
+Return the fallback task specified in the task definition
+*/
+Object.defineProperty(TaskProxy.prototype, 'fallback', {
+    get: function() {
+        return this.def._fallback;
     }
 });
 
