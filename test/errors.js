@@ -14,6 +14,8 @@ describe('error handling', function() {
 
         task.run('a').on('complete', function(err) {
             expect(err instanceof Error).to.be.ok();
+            expect(this.context.errors.length).to.be.above(0);
+            
             done();
         });
     });
@@ -29,6 +31,8 @@ describe('error handling', function() {
 
         task.run('a').on('complete', function(err) {
             expect(err instanceof Error).to.be.ok();
+            expect(this.context.errors.length).to.be.above(0);
+
             done();
         });
     });
@@ -44,6 +48,8 @@ describe('error handling', function() {
 
         task.run('a').on('complete', function(err) {
             expect(err instanceof Error).to.be.ok();
+            expect(this.context.errors.length).to.be.above(0);
+
             done();
         });
     });
@@ -63,6 +69,8 @@ describe('error handling', function() {
 
         task.run('a').on('complete', function(err) {
             expect(err instanceof Error).to.be.ok();
+            expect(this.context.errors.length).to.be.above(0);
+
             done();
         });
     });

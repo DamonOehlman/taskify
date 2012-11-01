@@ -15,6 +15,7 @@ describe('error fallback handling', function() {
         });
 
         task('c', function() {
+            console.log(this.context.errors);
             fellback = true;
         });
 

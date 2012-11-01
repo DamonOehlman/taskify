@@ -44,6 +44,14 @@ TaskProxy.prototype = {
             taskResult = args.length > 2 ? args.slice(1) : args[1],
             fallbackProxy;
 
+        // if we received an error, then add this to the context error stack
+        if (err) {
+            this.context.errors.push({
+                task: this.name,
+                error: err
+            });
+        }
+
         // if we hit an error, and we have a callback, then run the fallback
         if (err && this.fallback) {
             fallbackProxy = this.context.exec(this.fallback, this.execArgs);
@@ -56,9 +64,8 @@ TaskProxy.prototype = {
         }
 
         // if we have an execution context for the task, then update the results
-        // but only if we didn't receive an error
-        if (this.name && this.context && (! err)) {
-            this.context.results[this.name] = taskResult || true;
+        if (this.name && this.context) {
+            this.context.results[this.name] = err ? err : (taskResult || true);
         }
 
         setTimeout(function() {

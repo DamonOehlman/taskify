@@ -7,6 +7,9 @@ function ExecutionContext(registry) {
 
     // initialise the completed result container
     this.results = {};
+
+    // create the errors array
+    this.errors = [];
 }
 
 /**
