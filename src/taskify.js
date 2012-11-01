@@ -36,6 +36,15 @@ function taskify(name, opts, runner) {
 }
 
 /**
+## taskify.defaults
+
+Update the defaults for taskify
+*/
+taskify.defaults = function(opts) {
+    _defaults = _.clone(opts);
+};
+
+/**
 ## taskify.get
 
 Get a task by name

@@ -42,18 +42,20 @@ TaskProxy.prototype = {
         var task = this,
             args = Array.prototype.slice.call(arguments),
             taskResult = args.length > 2 ? args.slice(1) : args[1],
+            fallbackDef = taskify.get(this.fallback),
             fallbackProxy;
 
         // if we received an error, then add this to the context error stack
         if (err) {
-            this.context.errors.push({
-                task: this.name,
-                error: err
-            });
+            // add the task name to the error
+            err.task = this;
+
+            // save the error
+            this.context.errors.unshift(err);
         }
 
         // if we hit an error, and we have a callback, then run the fallback
-        if (err && this.fallback) {
+        if (err && fallbackDef) {
             fallbackProxy = this.context.exec(this.fallback, this.execArgs);
 
             // when the fallback task completes, run the completion event
