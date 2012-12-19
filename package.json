@@ -20,7 +20,9 @@
     "expect.js": "0.1.x",
     "mocha": "1.6.x",
     "request": "2.11.x",
-    "tako": "git://github.com/mikeal/tako.git"
+    "tako": "git://github.com/mikeal/tako.git",
+    "q": "0.8.x",
+    "when": "1.7.x"
   },
   "repository": {
     "type": "git",

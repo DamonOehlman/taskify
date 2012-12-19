@@ -111,6 +111,49 @@ Object.defineProperty(TaskProxy.prototype, 'name', {
     }
 });
 
+/**
+## @promise
+
+The promise property allows tasks to operate seamlessly within a promises
+implementation.  At this stage taskify looks to use `Q` by default, but can 
+also work with other promise implementations that implement a 
+`<packagename>.defer()` function as a way of creating a new Deferred instance (such
+as [when.js](https://github.com/cujojs/when)).
+
+To update taskify to use a library other than the default of `Q` simply update the
+taskify defaults::
+
+    taskify.defaults({
+        promiseLib: 'when'
+    });
+*/
+Object.defineProperty(TaskProxy.prototype, 'promise', {
+    get: function() {
+        var proxy = this, deferred;
+
+        // memoize
+        if (this._deferred) return this._deferred.promise;
+
+        // create the deferred object that we will resolve or reject 
+        // based on task completion
+        deferred = this._deferred = require(_defaults.promiseLib || 'q').defer();
+
+        // handle the complete event
+        this.once('complete', function(err) {
+            // reset the deferred member of the proxy
+            proxy._deferred = undefined;
+
+            // if we have an error reject the promise
+            if (err) return deferred.reject(err);
+
+            // otherwise resolve the promise
+            deferred.resolve.apply(deferred, Array.prototype.slice.call(arguments, 1));
+        });
+
+        return deferred.promise;
+    }
+});
+
 ['on', 'once'].forEach(function(bindingName) {
     TaskProxy.prototype[bindingName] = function(eventName, handler) {
         eve[bindingName]('taskify.' + eventName + '.' + this.id, handler);
