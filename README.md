@@ -107,6 +107,45 @@ This would generate the following output:
 Hi there { test: true }
 ```
 
+## Using the Task Loader (Node Only)
+
+To help structure task oriented applications, taskify supports a `loadTasks` function when used in node.  To use this function simply create a folder that you will use to define your tasks in (only single level supported at this stage).
+
+Within this folder, create modules that define the task functionality.  For example, if we were to create file `a.js` in the folder `tasks/` with the following content:
+
+```js
+module.exports = function() {
+    console.log('Hi from a');
+}
+```
+
+And then `b.js` in the same folder, but this time we want to define a dependency on task `a` from `b`:
+
+```js
+var runner = module.exports = function() {
+    console.log('Hi from b');
+};
+
+runner.deps = ['a'];
+```
+
+We could then load the tasks using the load tasks function, and then run task b:
+
+```js
+var taskify = require('taskify'),
+    path = require('path');
+
+taskify.loadTasks(path.resolve(__dirname, 'tasks'));
+taskify.run('b');
+```
+
+Would generate the following output:
+
+```
+Hi from a
+Hi from b
+```
+
 ## Experimental Use Case: Handling HTTP Requests without Middleware
 
 While this was not one of the reasons I created Taskify, it is something I experimented with as a way of resolving preconditions for a particular route handler.  While most web frameworks implement middleware to handle things like cookie or body parsing Taskify can offer an alternative approach.
