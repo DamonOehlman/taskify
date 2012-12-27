@@ -3,9 +3,9 @@
  * Simple Atomic Task Definition for Node and the Browser
  * 
  * -meta---
- * version:    0.3.6
- * builddate:  2012-12-19T06:21:51.903Z
- * generator:  interleave@0.5.23
+ * version:    0.3.7
+ * builddate:  2012-12-27T05:36:19.405Z
+ * generator:  interleave@0.5.24
  * 
  * 
  * 
@@ -364,6 +364,7 @@
     */
     taskify.select = function(target) {
         var context = new ExecutionContext(_.clone(registry)),
+            initArgs = Array.prototype.slice.call(arguments, 1),
             deps, tmpTask;
     
         // create a temporary task definition with deps on the specified target(s)
@@ -375,7 +376,7 @@
     
         return function() {
             // execute the task with the specified args
-            return context.exec(tmpTask, Array.prototype.slice.call(arguments));
+            return context.exec(tmpTask, initArgs.concat(Array.prototype.slice.call(arguments)));
         };
     };
     

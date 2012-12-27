@@ -54,4 +54,21 @@ describe('http server PoC tests', function() {
             done();
         });
     });
+
+    it('should be able to define a task that receives additional arguments on selection', function() {
+        task('third', function(name, req, res) {
+            res.end(name);
+        });
+
+        app.route('/3', task.select('third', 'bob')).methods('GET');
+    });
+
+    it('should be able to get the name bob on response', function(done) {
+        request.get('http://localhost:3000/3', function(err, res, body) {
+            assert.ifError(err);
+            assert.equal(body, 'bob');
+
+            done();
+        });
+    });
 });
