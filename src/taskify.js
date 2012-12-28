@@ -60,8 +60,7 @@ Prepare task(s) to execute, returning a function that will accept arguments
 that will be passed through to the tasks
 */
 taskify.select = function(target) {
-    var context = new ExecutionContext(_.clone(registry)),
-        initArgs = Array.prototype.slice.call(arguments, 1),
+    var initArgs = Array.prototype.slice.call(arguments, 1),
         deps, tmpTask;
 
     // create a temporary task definition with deps on the specified target(s)
@@ -72,8 +71,12 @@ taskify.select = function(target) {
     taskCounter += 1;
 
     return function() {
+        // create the new execution context
+        var context = new ExecutionContext(_.clone(registry)),
+            args = initArgs.concat(Array.prototype.slice.call(arguments));
+
         // execute the task with the specified args
-        return context.exec(tmpTask, initArgs.concat(Array.prototype.slice.call(arguments)));
+        return context.exec(tmpTask, args);
     };
 };
 
