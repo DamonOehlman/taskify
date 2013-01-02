@@ -3,9 +3,9 @@
  * Simple Atomic Task Definition for Node and the Browser
  * 
  * -meta---
- * version:    0.3.9
- * builddate:  2012-12-28T03:10:48.288Z
- * generator:  interleave@0.5.24
+ * version:    0.3.10
+ * builddate:  2013-01-02T06:50:00.427Z
+ * generator:  interleave@0.5.23
  * 
  * 
  * 
@@ -376,10 +376,23 @@
         return function() {
             // create the new execution context
             var context = new ExecutionContext(_.clone(registry)),
-                args = initArgs.concat(Array.prototype.slice.call(arguments));
+                args = initArgs.concat(Array.prototype.slice.call(arguments)),
+                callback,
+                proxy;
+    
+            if (typeof args[args.length - 1] == 'function') {
+                callback = args.pop();
+            }
     
             // execute the task with the specified args
-            return context.exec(tmpTask, args);
+            proxy = context.exec(tmpTask, args);
+    
+            // if we have a callback defined then attach it to the complete event of the proxy
+            if (callback) { 
+                proxy.once('complete', callback);
+            }
+    
+            return proxy;
         };
     };
     

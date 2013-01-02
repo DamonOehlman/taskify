@@ -73,10 +73,23 @@ taskify.select = function(target) {
     return function() {
         // create the new execution context
         var context = new ExecutionContext(_.clone(registry)),
-            args = initArgs.concat(Array.prototype.slice.call(arguments));
+            args = initArgs.concat(Array.prototype.slice.call(arguments)),
+            callback,
+            proxy;
+
+        if (typeof args[args.length - 1] == 'function') {
+            callback = args.pop();
+        }
 
         // execute the task with the specified args
-        return context.exec(tmpTask, args);
+        proxy = context.exec(tmpTask, args);
+
+        // if we have a callback defined then attach it to the complete event of the proxy
+        if (callback) { 
+            proxy.once('complete', callback);
+        }
+
+        return proxy;
     };
 };
 
