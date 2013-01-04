@@ -61,11 +61,12 @@ that will be passed through to the tasks
 */
 taskify.select = function(target) {
     var initArgs = Array.prototype.slice.call(arguments, 1),
-        deps, tmpTask;
+        deps = [].concat(target || []),
+        tmpTask;
 
     // create a temporary task definition with deps on the specified target(s)
     // TODO: generate a UUID for the task
-    tmpTask = new TaskDefinition('ghost' + taskCounter, { deps: [].concat(target || [])});
+    tmpTask = new TaskDefinition('ghost' + taskCounter, { deps: deps });
 
     // increment the task counter
     taskCounter += 1;
@@ -77,6 +78,9 @@ taskify.select = function(target) {
             callback,
             proxy;
 
+        // if we have been supplied a function as the last argument
+        // then we will assume it is a callback function
+        // TODO: investigate making this toggleable with a taskify switch ?
         if (typeof args[args.length - 1] == 'function') {
             callback = args.pop();
         }
@@ -91,6 +95,30 @@ taskify.select = function(target) {
 
         return proxy;
     };
+};
+
+/**
+## taskify.selectStrict
+
+The selectStrict function passes control through to the `taskify.select` function, but only
+once it has validated that task dependencies have been satisfied.  If dependencies cannot be
+satisfied then an Error will be thrown.
+*/
+taskify.selectStrict = function(target) {
+    var deps = [].concat(target || []),
+        resolvedDeps = deps.map(taskify.get).filter(_.identity),
+        isValid = deps.length === resolvedDeps.length;
+
+    // now check that each of the dependencies is valid
+    isValid = isValid && resolvedDeps.reduce(function(memo, task) {
+        return memo && task.valid;
+    }, isValid);
+
+    if (! isValid) {
+        throw new Error('Unable to select tasks (missing dependencies): "' + deps.join(', ') + '"');
+    }
+
+    return taskify.select.apply(this, arguments);
 };
 
 /**

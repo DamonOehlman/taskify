@@ -3,8 +3,8 @@
  * Simple Atomic Task Definition for Node and the Browser
  * 
  * -meta---
- * version:    0.3.10
- * builddate:  2013-01-02T06:50:00.427Z
+ * version:    0.4.0
+ * builddate:  2013-01-04T00:30:57.398Z
  * generator:  interleave@0.5.23
  * 
  * 
@@ -66,6 +66,21 @@
             return this;
         }
     };
+    
+    Object.defineProperty(TaskDefinition.prototype, 'valid', {
+        get: function() {
+            var deps = this._deps,
+                resolvedDeps = deps.map(taskify.get).filter(_.identity),
+                isValid = resolvedDeps.length === deps.length;
+    
+            // check that each of the dependencies is valid
+            isValid = isValid && resolvedDeps.reduce(function(memo, task) {
+                return memo && task.valid;
+            });
+    
+            return isValid;
+        }
+    });
     var proxyCounter = 1;
     
     /**
@@ -364,11 +379,12 @@
     */
     taskify.select = function(target) {
         var initArgs = Array.prototype.slice.call(arguments, 1),
-            deps, tmpTask;
+            deps = [].concat(target || []),
+            tmpTask;
     
         // create a temporary task definition with deps on the specified target(s)
         // TODO: generate a UUID for the task
-        tmpTask = new TaskDefinition('ghost' + taskCounter, { deps: [].concat(target || [])});
+        tmpTask = new TaskDefinition('ghost' + taskCounter, { deps: deps });
     
         // increment the task counter
         taskCounter += 1;
@@ -380,6 +396,9 @@
                 callback,
                 proxy;
     
+            // if we have been supplied a function as the last argument
+            // then we will assume it is a callback function
+            // TODO: investigate making this toggleable with a taskify switch ?
             if (typeof args[args.length - 1] == 'function') {
                 callback = args.pop();
             }
@@ -394,6 +413,30 @@
     
             return proxy;
         };
+    };
+    
+    /**
+    ## taskify.selectStrict
+    
+    The selectStrict function passes control through to the `taskify.select` function, but only
+    once it has validated that task dependencies have been satisfied.  If dependencies cannot be
+    satisfied then an Error will be thrown.
+    */
+    taskify.selectStrict = function(target) {
+        var deps = [].concat(target || []),
+            resolvedDeps = deps.map(taskify.get).filter(_.identity),
+            isValid = deps.length === resolvedDeps.length;
+    
+        // now check that each of the dependencies is valid
+        isValid = isValid && resolvedDeps.reduce(function(memo, task) {
+            return memo && task.valid;
+        }, isValid);
+    
+        if (! isValid) {
+            throw new Error('Unable to select tasks (missing dependencies): "' + deps.join(', ') + '"');
+        }
+    
+        return taskify.select.apply(this, arguments);
     };
     
     /**

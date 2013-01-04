@@ -37,3 +37,18 @@ TaskDefinition.prototype = {
         return this;
     }
 };
+
+Object.defineProperty(TaskDefinition.prototype, 'valid', {
+    get: function() {
+        var deps = this._deps,
+            resolvedDeps = deps.map(taskify.get).filter(_.identity),
+            isValid = resolvedDeps.length === deps.length;
+
+        // check that each of the dependencies is valid
+        isValid = isValid && resolvedDeps.reduce(function(memo, task) {
+            return memo && task.valid;
+        });
+
+        return isValid;
+    }
+});

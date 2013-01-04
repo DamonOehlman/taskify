@@ -71,20 +71,4 @@ describe('http server PoC tests', function() {
             done();
         });
     });
-
-    it('should be able to register a task with a non-existant dependency', function() {
-        task('look-for-it', ['not-implemented'], function(req, res) {
-            res.end('not found');
-        });
-
-        app.route('/look-for-it', task.select('look-for-it')).methods('GET');
-        app.route('/not-implemented', task.select('not-implemented')).methods('GET');
-    });
-
-    it('should receive a valid response when a task dependency is not resolved', function(done) {
-        request.get('http://localhost:3000/look-for-it', function(err, res, body) {
-            console.log(err);
-            done();
-        });
-    });
 });
