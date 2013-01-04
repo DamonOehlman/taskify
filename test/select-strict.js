@@ -12,6 +12,6 @@ describe('selectStrict tests', function() {
     });
 
     it('should raise an exception when attempting to selectStrict the defined task', function() {
-        assert.throws(taskify.selectStrict.bind(null, 'b'));
+        assert.throws(taskify.select.bind(null, 'b'));
     });
 });

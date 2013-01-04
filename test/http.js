@@ -18,7 +18,7 @@ describe('http server PoC tests', function() {
     });
 
     it('should be able to register a tako handler for the task', function() {
-        app.route('/hi', task.selectStrict('sayHello')).methods('GET');
+        app.route('/hi', task.select('sayHello')).methods('GET');
     });
 
     it('should be able to set the server running', function(done) {
@@ -43,7 +43,7 @@ describe('http server PoC tests', function() {
             res.write('1');
         });
 
-        app.route('/12', task.selectStrict('second')).methods('GET');
+        app.route('/12', task.select('second')).methods('GET');
     });
 
     it('should be able to get the combined response from the tasks', function(done) {
@@ -60,7 +60,7 @@ describe('http server PoC tests', function() {
             res.end(name);
         });
 
-        app.route('/3', task.selectStrict('third', 'bob')).methods('GET');
+        app.route('/3', task.select('third', 'bob')).methods('GET');
     });
 
     it('should be able to get the name bob on response', function(done) {

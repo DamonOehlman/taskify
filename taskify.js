@@ -3,8 +3,8 @@
  * Simple Atomic Task Definition for Node and the Browser
  * 
  * -meta---
- * version:    0.4.2
- * builddate:  2013-01-04T03:45:13.574Z
+ * version:    0.4.3
+ * builddate:  2013-01-04T03:50:15.442Z
  * generator:  interleave@0.5.23
  * 
  * 
@@ -387,12 +387,12 @@
     };
     
     /**
-    ## taskify.select
+    ## taskify.prepare
     
     Prepare task(s) to execute, returning a function that will accept arguments
     that will be passed through to the tasks
     */
-    taskify.select = function(target) {
+    taskify.prepare = function(target) {
         var initArgs = Array.prototype.slice.call(arguments, 1),
             deps = [].concat(target || []),
             tmpTask;
@@ -431,13 +431,13 @@
     };
     
     /**
-    ## taskify.selectStrict
+    ## taskify.select
     
-    The selectStrict function passes control through to the `taskify.select` function, but only
+    The select function passes control through to the `taskify.prepare` function, but only
     once it has validated that task dependencies have been satisfied.  If dependencies cannot be
     satisfied then an Error will be thrown.
     */
-    taskify.selectStrict = function(target) {
+    taskify.select = function(target) {
         var deps = [].concat(target || []),
             tmpDef = new TaskDefinition('tmp', { deps: deps }),
             missingDeps = [];
@@ -457,7 +457,7 @@
             throw error;
         }
     
-        return taskify.select.apply(this, arguments);
+        return taskify.prepare.apply(this, arguments);
     };
     
     /**
@@ -474,7 +474,7 @@
     ## taskify.run
     */
     taskify.run = function(target) {
-        return taskify.select(target).apply(null, Array.prototype.slice.call(arguments, 1));
+        return taskify.prepare(target).apply(null, Array.prototype.slice.call(arguments, 1));
     };
     
     return typeof taskify != 'undefined' ? taskify : undefined;

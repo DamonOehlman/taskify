@@ -54,12 +54,12 @@ taskify.get = function(taskName) {
 };
 
 /**
-## taskify.select
+## taskify.prepare
 
 Prepare task(s) to execute, returning a function that will accept arguments
 that will be passed through to the tasks
 */
-taskify.select = function(target) {
+taskify.prepare = function(target) {
     var initArgs = Array.prototype.slice.call(arguments, 1),
         deps = [].concat(target || []),
         tmpTask;
@@ -98,13 +98,13 @@ taskify.select = function(target) {
 };
 
 /**
-## taskify.selectStrict
+## taskify.select
 
-The selectStrict function passes control through to the `taskify.select` function, but only
+The select function passes control through to the `taskify.prepare` function, but only
 once it has validated that task dependencies have been satisfied.  If dependencies cannot be
 satisfied then an Error will be thrown.
 */
-taskify.selectStrict = function(target) {
+taskify.select = function(target) {
     var deps = [].concat(target || []),
         tmpDef = new TaskDefinition('tmp', { deps: deps }),
         missingDeps = [];
@@ -124,7 +124,7 @@ taskify.selectStrict = function(target) {
         throw error;
     }
 
-    return taskify.select.apply(this, arguments);
+    return taskify.prepare.apply(this, arguments);
 };
 
 /**
@@ -141,5 +141,5 @@ taskify.reset = function() {
 ## taskify.run
 */
 taskify.run = function(target) {
-    return taskify.select(target).apply(null, Array.prototype.slice.call(arguments, 1));
+    return taskify.prepare(target).apply(null, Array.prototype.slice.call(arguments, 1));
 };
