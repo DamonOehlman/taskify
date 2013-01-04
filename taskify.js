@@ -3,8 +3,8 @@
  * Simple Atomic Task Definition for Node and the Browser
  * 
  * -meta---
- * version:    0.4.0
- * builddate:  2013-01-04T00:30:57.398Z
+ * version:    0.4.1
+ * builddate:  2013-01-04T01:19:42.542Z
  * generator:  interleave@0.5.23
  * 
  * 
@@ -74,9 +74,9 @@
                 isValid = resolvedDeps.length === deps.length;
     
             // check that each of the dependencies is valid
-            isValid = isValid && resolvedDeps.reduce(function(memo, task) {
+            isValid = resolvedDeps.reduce(function(memo, task) {
                 return memo && task.valid;
-            });
+            }, isValid);
     
             return isValid;
         }
@@ -426,6 +426,11 @@
         var deps = [].concat(target || []),
             resolvedDeps = deps.map(taskify.get).filter(_.identity),
             isValid = deps.length === resolvedDeps.length;
+    
+        // if we have no dependencies then throw an exception
+        if (deps.length === 0) {
+            throw new Error('Task names are required to select tasks');
+        }
     
         // now check that each of the dependencies is valid
         isValid = isValid && resolvedDeps.reduce(function(memo, task) {

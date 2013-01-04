@@ -45,9 +45,9 @@ Object.defineProperty(TaskDefinition.prototype, 'valid', {
             isValid = resolvedDeps.length === deps.length;
 
         // check that each of the dependencies is valid
-        isValid = isValid && resolvedDeps.reduce(function(memo, task) {
+        isValid = resolvedDeps.reduce(function(memo, task) {
             return memo && task.valid;
-        });
+        }, isValid);
 
         return isValid;
     }

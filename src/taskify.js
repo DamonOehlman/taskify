@@ -109,6 +109,11 @@ taskify.selectStrict = function(target) {
         resolvedDeps = deps.map(taskify.get).filter(_.identity),
         isValid = deps.length === resolvedDeps.length;
 
+    // if we have no dependencies then throw an exception
+    if (deps.length === 0) {
+        throw new Error('Task names are required to select tasks');
+    }
+
     // now check that each of the dependencies is valid
     isValid = isValid && resolvedDeps.reduce(function(memo, task) {
         return memo && task.valid;
