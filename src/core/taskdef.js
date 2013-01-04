@@ -35,20 +35,35 @@ TaskDefinition.prototype = {
 
         // chaining goodness
         return this;
+    },
+
+    /**
+    ## isValid(missingDeps)
+
+    The valid method looks for the dependencies of the task and attempts to retrieve
+    them from the taskify registry.  If all dependencies are resolved, `isValid` will
+    return true, or false if not.
+
+    If the method is provided an array for the missingDeps argument, unresolved
+    task names will be pushed onto the array and can be accessed for diagnosis of the error.
+    */
+    isValid: function(missingDeps) {
+        var valid = true;
+
+        // iterate through the dependencies and find any that are not defined
+        this._deps.forEach(function(taskName) {
+            var dep = taskify.get(taskName);
+
+            // update the valid flag
+            valid = valid && (typeof dep != 'undefined') && dep.isValid(missingDeps);
+
+            // if the dependency was not found, and we have a missing deps array
+            // then add the name to the array
+            if ((! dep) && missingDeps && typeof missingDeps.push == 'function') {
+                missingDeps.push(taskName);
+            }
+        });
+
+        return valid;
     }
 };
-
-Object.defineProperty(TaskDefinition.prototype, 'valid', {
-    get: function() {
-        var deps = this._deps,
-            resolvedDeps = deps.map(taskify.get).filter(_.identity),
-            isValid = resolvedDeps.length === deps.length;
-
-        // check that each of the dependencies is valid
-        isValid = resolvedDeps.reduce(function(memo, task) {
-            return memo && task.valid;
-        }, isValid);
-
-        return isValid;
-    }
-});

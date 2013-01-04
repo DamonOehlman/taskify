@@ -3,8 +3,8 @@
  * Simple Atomic Task Definition for Node and the Browser
  * 
  * -meta---
- * version:    0.4.1
- * builddate:  2013-01-04T01:19:42.542Z
+ * version:    0.4.2
+ * builddate:  2013-01-04T03:45:13.574Z
  * generator:  interleave@0.5.23
  * 
  * 
@@ -64,23 +64,38 @@
     
             // chaining goodness
             return this;
+        },
+    
+        /**
+        ## isValid(missingDeps)
+    
+        The valid method looks for the dependencies of the task and attempts to retrieve
+        them from the taskify registry.  If all dependencies are resolved, `isValid` will
+        return true, or false if not.
+    
+        If the method is provided an array for the missingDeps argument, unresolved
+        task names will be pushed onto the array and can be accessed for diagnosis of the error.
+        */
+        isValid: function(missingDeps) {
+            var valid = true;
+    
+            // iterate through the dependencies and find any that are not defined
+            this._deps.forEach(function(taskName) {
+                var dep = taskify.get(taskName);
+    
+                // update the valid flag
+                valid = valid && (typeof dep != 'undefined') && dep.isValid(missingDeps);
+    
+                // if the dependency was not found, and we have a missing deps array
+                // then add the name to the array
+                if ((! dep) && missingDeps && typeof missingDeps.push == 'function') {
+                    missingDeps.push(taskName);
+                }
+            });
+    
+            return valid;
         }
     };
-    
-    Object.defineProperty(TaskDefinition.prototype, 'valid', {
-        get: function() {
-            var deps = this._deps,
-                resolvedDeps = deps.map(taskify.get).filter(_.identity),
-                isValid = resolvedDeps.length === deps.length;
-    
-            // check that each of the dependencies is valid
-            isValid = resolvedDeps.reduce(function(memo, task) {
-                return memo && task.valid;
-            }, isValid);
-    
-            return isValid;
-        }
-    });
     var proxyCounter = 1;
     
     /**
@@ -424,21 +439,22 @@
     */
     taskify.selectStrict = function(target) {
         var deps = [].concat(target || []),
-            resolvedDeps = deps.map(taskify.get).filter(_.identity),
-            isValid = deps.length === resolvedDeps.length;
+            tmpDef = new TaskDefinition('tmp', { deps: deps }),
+            missingDeps = [];
     
         // if we have no dependencies then throw an exception
         if (deps.length === 0) {
             throw new Error('Task names are required to select tasks');
         }
     
-        // now check that each of the dependencies is valid
-        isValid = isValid && resolvedDeps.reduce(function(memo, task) {
-            return memo && task.valid;
-        }, isValid);
+        // if the temporary task is not valid, then also throw an error
+        if (! tmpDef.isValid(missingDeps)) {
+            var error = new Error('Unable to select task, unresolved dependencies: [' + 
+                    missingDeps.join(', ') + ']');
     
-        if (! isValid) {
-            throw new Error('Unable to select tasks (missing dependencies): "' + deps.join(', ') + '"');
+            // add the missing dependencies array to the error
+            error.missing = [].concat(missingDeps);
+            throw error;
         }
     
         return taskify.select.apply(this, arguments);

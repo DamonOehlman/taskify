@@ -106,21 +106,22 @@ satisfied then an Error will be thrown.
 */
 taskify.selectStrict = function(target) {
     var deps = [].concat(target || []),
-        resolvedDeps = deps.map(taskify.get).filter(_.identity),
-        isValid = deps.length === resolvedDeps.length;
+        tmpDef = new TaskDefinition('tmp', { deps: deps }),
+        missingDeps = [];
 
     // if we have no dependencies then throw an exception
     if (deps.length === 0) {
         throw new Error('Task names are required to select tasks');
     }
 
-    // now check that each of the dependencies is valid
-    isValid = isValid && resolvedDeps.reduce(function(memo, task) {
-        return memo && task.valid;
-    }, isValid);
+    // if the temporary task is not valid, then also throw an error
+    if (! tmpDef.isValid(missingDeps)) {
+        var error = new Error('Unable to select task, unresolved dependencies: [' + 
+                missingDeps.join(', ') + ']');
 
-    if (! isValid) {
-        throw new Error('Unable to select tasks (missing dependencies): "' + deps.join(', ') + '"');
+        // add the missing dependencies array to the error
+        error.missing = [].concat(missingDeps);
+        throw error;
     }
 
     return taskify.select.apply(this, arguments);
