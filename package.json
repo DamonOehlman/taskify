@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "async": "0.1.x",
-    "eve": "git://github.com/DmitryBaranovskiy/eve.git",
+    "eve": "git://github.com/adobe-webplatform/eve.git",
     "underscore": "1.4.x"
   },
   "devDependencies": {
