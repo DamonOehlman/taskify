@@ -7,7 +7,7 @@ var _ = require('underscore');
 
 /**
   ## TaskDefinition
-*/
+**/
 function TaskDefinition(name, opts) {
   if (! (this instanceof TaskDefinition)) {
     return new TaskDefinition(name, opts);

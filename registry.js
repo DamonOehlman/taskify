@@ -4,6 +4,11 @@
 var registry = {};
 
 /**
+  ## registry
+
+**/
+
+/**
   ### registry.get(name)
 
 **/

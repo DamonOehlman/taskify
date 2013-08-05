@@ -126,9 +126,9 @@ This would generate the following output:
 Hi there { test: true }
 ```
 
-## Taskify Function Reference
+# Taskify Reference
 
-### taskify(name, opts, runner)
+## taskify(name, opts, runner)
 
 ## taskify.defaults
 
@@ -137,6 +137,11 @@ Update the defaults for taskify
 ## taskify.get
 
 Get a task by name
+
+## taskify.prepare
+
+Prepare task(s) to execute, returning a function that will accept arguments
+that will be passed through to the tasks
 
 ## taskify.select
 
@@ -157,6 +162,8 @@ Reset the registry - clear existing task definitions.
 
 Execute the specified task passing the args to the runner
 
+## TaskDefinition
+
 ### depends(names)
 
 ### isValid(missingDeps)
@@ -172,6 +179,11 @@ of the error.
 ### unresolved()
 
 Return the names of any unresolved dependencies
+
+## TaskProxy
+
+The TaskProxy provides access to the TaskDefinition information but
+provides state isolation during task execution.
 
 ### async()
 
@@ -210,6 +222,8 @@ taskify.defaults({
   promiseLib: 'when'
 });
 ```
+
+## registry
 
 ### registry.get(name)
 

@@ -141,9 +141,9 @@ var ExecutionContext = require('./context');
 
 
 /**
-  ## Taskify Function Reference
+  # Taskify Reference
 
-  ### taskify(name, opts, runner)
+  ## taskify(name, opts, runner)
 **/
 var taskify = module.exports = function(name, opts, runner) {
   var task;
@@ -190,7 +190,7 @@ taskify.get = registry.get;
 
   Prepare task(s) to execute, returning a function that will accept arguments
   that will be passed through to the tasks
-*/
+**/
 taskify.prepare = function(target) {
   var initArgs = Array.prototype.slice.call(arguments, 1);
   var deps = [].concat(target || []);

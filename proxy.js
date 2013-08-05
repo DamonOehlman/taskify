@@ -11,7 +11,7 @@ var eve = require('eve');
 
   The TaskProxy provides access to the TaskDefinition information but
   provides state isolation during task execution. 
-*/
+**/
 function TaskProxy(def, context, execArgs) {
   if (! (this instanceof TaskProxy)) {
     return new TaskProxy(def, context, execArgs);
