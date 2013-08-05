@@ -1,19 +1,16 @@
-describe('args passthru tests', function() {
-    var expect = require('expect.js'),
-        eve = require('eve'),
-        _ = require('underscore'),
-        task = require('../taskify'),
-        executed = [],
-        a, b, c;
+var test = require('tape');
+var taskify = require('../');
 
-    before(task.reset);
+test('reset', function(t) {
+  taskify.reset();
+  t.end();
+});
 
-    it('should pass through arguments in a run call to the task handler', function(done) {
-        task('a', function(value) {
-            expect(value).to.equal(5);
-            done();
-        });
+test('passthrough args', function(t) {
+  t.plan(1);
+  taskify('a', function(value) {
+    t.equal(value, 5);
+  });
 
-        task.run('a', 5);
-    });
+  taskify.run('a', 5);
 });

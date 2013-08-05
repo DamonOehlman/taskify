@@ -1,47 +1,45 @@
-describe('error fallback handling', function() {
-    var expect = require('expect.js'),
-        eve = require('eve'),
-        _ = require('underscore'),
-        task = require('../taskify'),
-        cannedError = new Error('Something went wrong');
+var test = require('tape');
+var taskify = require('..');
+var cannedError = new Error('Something went wrong');
 
-    beforeEach(task.reset);
+test('callback handler involved synchronously', function(t) {
+  var fellback = false;
 
-    it('a fallback handler can be specified and invoked for a synchronous task', function(done) {
-        var fellback = false;
+  taskify.reset();
 
-        task('a', { fallback: 'c' }, function() {
-            return cannedError;
-        });
+  taskify('a', { fallback: 'c' }, function() {
+    return cannedError;
+  });
 
-        task('c', function() {
-            fellback = true;
-        });
+  taskify('c', function() {
+    fellback = true;
+  });
 
-        task.run('a').on('complete', function(err) {
-            expect(err).to.not.be.ok();
-            expect(fellback).to.be.ok();
-            done();
-        });
-    });
-
-    it('should pass original run args to the fallback handler', function(done) {
-        var fellback = false;
-
-        task('a', { fallback: 'c' }, function(value) {
-            expect(value).to.equal(5);
-            return cannedError;
-        });
-
-        task('c', function(value) {
-            expect(value).to.equal(5);
-            fellback = true;
-        });
-
-        task.run('a', 5).on('complete', function(err) {
-            expect(err).to.not.be.ok();
-            expect(fellback).to.be.ok();
-            done();
-        });
-    });
+  t.plan(2);
+  taskify.run('a').on('complete', function(err) {
+    t.ifError(err, 'captured error, did not fallback');
+    t.equal(fellback, true);
+  });
 });
+
+/*test('pass original args to fallback handler', function(t) {
+  var fellback = false;
+
+  taskify.reset();
+
+  taskify('a', { fallback: 'c' }, function(value) {
+    t.equal(value, 5);
+    return cannedError;
+  });
+
+  taskify('c', function(value) {
+    t.equal(value, t);
+    fellback = true;
+  });
+
+  t.plan(4);
+  taskify.run('a', 5).on('complete', function(err) {
+    t.ifError(err);
+    t.equal(fellback, true);
+  });
+});*/

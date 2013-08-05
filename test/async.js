@@ -1,73 +1,87 @@
-describe('async execution tests', function() {
-    var expect = require('expect.js'),
-        eve = require('eve'),
-        _ = require('underscore'),
-        task = require('../taskify'),
-        executed = [],
-        a, b, c;
+var test = require('tape');
+var taskify = require('..');
+var executed = [];
+var a;
+var b;
+var c;
 
-    function trackTask() {
-        executed.push(this.name);
-        setTimeout(this.async(), 50);
-    }
+function trackTask() {
+  executed.push(this.name);
+  setTimeout(this.async(), 50);
+}
 
-    before(task.reset);
-    beforeEach(function() {
-        // reset the executed tasks array
-        executed = [];
-    });
-
-    it('should be able to specify a dependency for a task', function(done) {
-        a = task('a', { deps: ['b'] }, trackTask);
-
-        // run a
-        task.run('a').once('complete', function(err) {
-            // expect an error because we are missing module b
-            expect(err).to.be.ok();
-            expect(err.message).to.equal('Task "b" not found');
-            done();
-        });
-    });
-
-    it('should be able to specify a dependency jake style', function(done) {
-        a = task('a', ['b'], trackTask);
-        task.run('a').once('complete', function(err) {
-            expect(err).to.be.ok();
-            expect(err.message).to.equal('Task "b" not found');
-            done();
-        });
-    });
-
-    it('should be able to register task b, then run task a', function(done) {
-        b = task('b', trackTask);
-        task.run('a').once('complete', function(err) {
-            expect(err).to.not.be.ok();
-            expect(executed).to.eql(['b', 'a']);
-
-            done();
-        });
-    });
-
-    it('should be able to inject an additional dependency for b', function(done) {
-        c = task('c', trackTask);
-        b.depends('c');
-
-        task.run('a').once('complete', function(err) {
-            expect(err).to.not.be.ok();
-            expect(executed).to.eql(['c', 'b', 'a']);
-
-            done();
-        });
-    });
-
-    it('should reject a cyclic dependency', function(done) {
-        c.depends('c');
-
-        task.run('a').once('complete', function(err) {
-            expect(err).to.not.be.ok();
-            expect(executed).to.eql(['c', 'b', 'a']);
-
-            done();
-        });
-    });
+test('reset', function(t) {
+  taskify.reset();
+  t.end();
 });
+
+test('specify a dependency', function(t) {
+  a = taskify('a', { deps: ['b'] }, trackTask);
+  executed = [];
+
+  // run a
+  t.plan(2);
+  taskify.run('a').once('complete', function(err) {
+    t.ok(err, 'captured error');
+    t.equal(err.message, 'Task "b" not found');
+  });
+});
+
+test('specify dependency (jake style)', function(t) {
+  a = taskify('a', ['b'], trackTask);
+  executed = [];
+
+  // run a
+  t.plan(2);
+  taskify.run('a').once('complete', function(err) {
+    t.ok(err, 'captured error');
+    t.equal(err.message, 'Task "b" not found');
+  });
+});
+
+test('register task b', function(t) {
+  b = taskify('b', trackTask);
+  executed = [];
+
+  t.plan(2);
+  taskify.run('a').once('complete', function(err) {
+    t.ifError(err, 'no error');
+    t.deepEqual(executed, ['b', 'a']);
+  });
+})
+
+test('register additional dependency', function(t) {
+  c = taskify('c', trackTask);
+  b.depends('c');
+  executed = [];
+
+  t.plan(2);
+  taskify.run('a').once('complete', function(err) {
+    t.ifError(err, 'no error');
+    t.deepEqual(executed, ['c', 'b', 'a']);
+  });
+});
+
+test('reject cyclic dependency (c --> c)', function(t) {
+  c.depends('c');
+  executed = [];
+
+  t.plan(2);
+  taskify.run('a').once('complete', function(err) {
+    t.ifError(err, 'no error');
+    t.deepEqual(executed, ['c', 'b', 'a']);
+  });
+});
+
+/*
+// TODO
+test('reject cyclic dependency (c --> a)', function(t) {
+  c.depends('a');
+  executed = [];
+
+  t.plan(2);
+  taskify.run('a').once('complete', function(err) {
+    t.ifError(err, 'no error');
+    t.deepEqual(executed, ['c', 'b', 'a']);
+  });
+});*/
