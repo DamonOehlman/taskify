@@ -1,50 +1,57 @@
-describe('eve event capture', function() {
-    var expect = require('expect.js'),
-        eve = require('eve'),
-        _ = require('underscore'),
-        task = require('../taskify'),
-        executed = [],
-        a, b, c;
+var eve = require('eve');
+var test = require('tape');
+var taskify = require('..');
+var a, b, c;
 
-    function trackTask() {
-        executed.push(this.name);
-        setTimeout(this.async(), 50);
-    }
+function trackTask() {
+  executed.push(this.name);
+  setTimeout(this.async(), 50);
+}
 
-    before(task.reset);
-    beforeEach(function() {
-        // reset the executed tasks array
-        executed = [];
-    });
+test('taskify reset', function(t) {
+  t.plan(1);
+  t.ok(taskify.reset(), 'no tasks');
+});
 
-    it('should be able to register task a', function() {
-        a = task('a', { deps: ['b'] }, trackTask);
-    });
+test('register task a', function(t) {
+  t.plan(1);
+  a = taskify('a', ['b'], trackTask);
+  t.ok(taskify.get('a'), 'a registered');
+});
 
-    it('should be able to register task b, then run task a', function(done) {
-        b = task('b', trackTask);
+test('register task b', function(t) {
+  t.plan(1);
+  b = taskify('b', trackTask);
+  t.ok(taskify.get('b'), 'b registered');
+});
 
-        eve.once('taskify.complete.a', function(err) {
-            expect(err).to.not.be.ok();
-            expect(executed).to.eql(['b', 'a']);
+test('exec b, monitor completion via eve', function(t) {
+  t.plan(2);
 
-            done();
-        });
+  executed = [];
+  eve.once('taskify.complete.a', function(err) {
+    t.ifError(err);
+    t.deepEqual(executed, ['b', 'a']);
+  });
 
-        task.run('a');
-    });
+  taskify.run('a');
+});
 
-    it('should be able to inject an additional dependency for b', function(done) {
-        c = task('c', trackTask);
-        b.depends('c');
+test('register task c', function(t) {
+  t.plan(1);
+  a = taskify('c', trackTask);
+  t.ok(taskify.get('c'), 'c registered');
+});
 
-        eve.once('taskify.complete.a', function(err) {
-            expect(err).to.not.be.ok();
-            expect(executed).to.eql(['c', 'b', 'a']);
+test('inject additional dep, monitor completion via eve', function(t) {
+  t.plan(2);
+  b.depends('c');
 
-            done();
-        });
+  executed = [];
+  eve.once('taskify.complete.a', function(err) {
+    t.ifError(err);
+    t.deepEqual(executed, ['c', 'b', 'a']);
+  });
 
-        task.run('a');
-    });
+  taskify.run('a');  
 });

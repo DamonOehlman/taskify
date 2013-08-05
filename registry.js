@@ -13,4 +13,6 @@ exports.put = function(taskName, definition) {
 
 exports.reset = function() {
   registry = {};
+
+  return Object.keys(registry).length === 0;
 };

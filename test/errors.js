@@ -1,77 +1,72 @@
-describe('error handling', function() {
-    var expect = require('expect.js'),
-        eve = require('eve'),
-        _ = require('underscore'),
-        task = require('../taskify'),
-        cannedError = new Error('Something went wrong');
+var test = require('tape');
+var taskify = require('..');
+var cannedError = new Error('Something went wrong');
 
-    beforeEach(task.reset);
+test('capture errors returned from synchronous tasks', function(t) {
+  taskify('a', function() {
+    return cannedError;
+  });
 
-    it('should be able to capture errors returned from synchronous tasks', function(done) {
-        task('a', function() {
-            return cannedError;
-        });
+  t.plan(2);
+  taskify.run('a').on('complete', function(err) {
+    t.ok(err instanceof Error, 'captured error');
+    t.ok(this.context.errors.length > 0, 'errors captured in context');
+  });
+});
 
-        task.run('a').on('complete', function(err) {
-            expect(err instanceof Error).to.be.ok();
-            expect(this.context.errors.length).to.be.above(0);
-            
-            done();
-        });
-    });
+test('capture errors in asynchronous tasks', function(t) {
+  taskify.reset();
+  taskify('a', function() {
+    var cb = this.async();
 
-    it('should be able to capture errors in asynchronous tasks', function(done) {
-        task('a', function() {
-            var cb = this.async();
+    setTimeout(function() {
+      cb(cannedError);
+    }, 100);
+  });
 
-            setTimeout(function() {
-                cb(cannedError);
-            }, 100);
-        });
+  t.plan(2);
+  taskify.run('a').on('complete', function(err) {
+    t.ok(err instanceof Error, 'captured error');
+    t.ok(this.context.errors.length > 0, 'errors captured in context');
+  });
+});
 
-        task.run('a').on('complete', function(err) {
-            expect(err instanceof Error).to.be.ok();
-            expect(this.context.errors.length).to.be.above(0);
+test('pass through errors (sync)', function(t) {
+  taskify.reset();
 
-            done();
-        });
-    });
+  taskify('a', ['b'], function() {
+    t.fail('Task a ran but shouldn\'t have');
+  });
 
-    it('should pass errors through from dependent tasks (sync)', function(done) {
-        task('a', ['b'], function() {
-            throw new Error('Task a ran but shouldn\'t have');
-        });
+  taskify('b', function() {
+    return cannedError;
+  });
 
-        task('b', function() {
-            return cannedError;
-        });
+  t.plan(2);
+  taskify.run('a').on('complete', function(err) {
+    t.ok(err instanceof Error, 'captured error');
+    t.ok(this.context.errors.length > 0, 'errors captured in context');
+  });
+});
 
-        task.run('a').on('complete', function(err) {
-            expect(err instanceof Error).to.be.ok();
-            expect(this.context.errors.length).to.be.above(0);
+test('pass through errors (async)', function(t) {
+  taskify.reset();
 
-            done();
-        });
-    });
+  taskify('a', ['b'], function() {
+    t.fail('Task a ran but shouldn\'t have');
+  });
 
-    it('should pass errors through from dependent tasks (async)', function(done) {
-        task('a', ['b'], function() {
-            throw new Error('Task a ran but shouldn\'t have');
-        });
+  taskify('b', function() {
+    var cb = this.async();
 
-        task('b', function() {
-            var cb = this.async();
+    setTimeout(function() {
+      cb(cannedError);
+    }, 100);
+  });
 
-            setTimeout(function() {
-                cb(cannedError);
-            }, 100);
-        });
-
-        task.run('a').on('complete', function(err) {
-            expect(err instanceof Error).to.be.ok();
-            expect(this.context.errors.length).to.be.above(0);
-
-            done();
-        });
-    });
+  t.plan(2);
+  taskify.run('a').on('complete', function(err) {
+    t.ok(err instanceof Error, 'captured error');
+    t.ok(this.context.errors.length > 0, 'errors captured in context');
+  });
 });

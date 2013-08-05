@@ -22,7 +22,7 @@ test('callback handler involved synchronously', function(t) {
   });
 });
 
-/*test('pass original args to fallback handler', function(t) {
+test('pass original args to fallback handler', function(t) {
   var fellback = false;
 
   taskify.reset();
@@ -33,7 +33,7 @@ test('callback handler involved synchronously', function(t) {
   });
 
   taskify('c', function(value) {
-    t.equal(value, t);
+    t.equal(value, 5);
     fellback = true;
   });
 
@@ -42,4 +42,4 @@ test('callback handler involved synchronously', function(t) {
     t.ifError(err);
     t.equal(fellback, true);
   });
-});*/
+});
