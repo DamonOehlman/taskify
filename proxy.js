@@ -152,8 +152,9 @@ Object.defineProperty(TaskProxy.prototype, 'promise', {
     var plib = defaults('promiseLib');
 
     // memoize
-    if (this._deferred) return this._deferred.promise;
-
+    if (this._deferred) {
+      return this._deferred.promise;
+    }
 
     // create the deferred object that we will resolve or reject 
     // based on task completion
@@ -165,7 +166,9 @@ Object.defineProperty(TaskProxy.prototype, 'promise', {
       proxy._deferred = undefined;
 
       // if we have an error reject the promise
-      if (err) return deferred.reject(err);
+      if (err) {
+        return deferred.reject(err);
+      }
 
       // otherwise resolve the promise
       deferred.resolve.apply(

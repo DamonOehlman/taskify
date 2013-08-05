@@ -18,14 +18,16 @@ exports.get = function(taskName) {
 **/
 exports.missing = function(name) {
   return typeof registry[name] == 'undefined';
-}
+};
 
 /**
   ### registry.put(name, definition)
 
 **/
 exports.put = function(taskName, definition) {
-  return registry[taskName] = definition;
+  registry[taskName] = definition;
+
+  return definition;
 };
 
 /**

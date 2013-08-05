@@ -26,6 +26,7 @@
     "url": "http://github.com/DamonOehlman/taskify/issues"
   },
   "scripts": {
+    "lint": "jshint *.js",
     "test": "node test/all.js"
   },
   "contributors": []

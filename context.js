@@ -32,7 +32,6 @@ Execute the specified task passing the args to the runner
 ExecutionContext.prototype.exec = function(target, args) {
   var context = this;
   var task;
-  var lastTask;
   var proxy;
 
   // get the task from the registry (if not a task itself)
@@ -44,14 +43,17 @@ ExecutionContext.prototype.exec = function(target, args) {
   }
 
   // if the task is not found, then return an error
-  if (! task) return new Error('Task "' + target + '" not found');
+  if (! task) {
+    return new Error('Task "' + target + '" not found');
+  }
 
   // create a task proxy
   proxy = new TaskProxy(task, this, args);
 
   // run the dependent tasks
   async.each(
-    // determine the actual deps (i.e. those task deps that have not already been run)
+    // determine the actual deps (i.e. those task deps that have 
+    // not already been run)
     _.without(task._deps, Object.keys(this.results)),
 
     function(depname, itemCallback) {
@@ -73,7 +75,9 @@ ExecutionContext.prototype.exec = function(target, args) {
       var runnerResult;
       var runnerErr = null;
 
-      if (err) return proxy.complete(err);
+      if (err) {
+        return proxy.complete(err);
+      }
 
       // execute the task
       if (typeof task.runner == 'function') {

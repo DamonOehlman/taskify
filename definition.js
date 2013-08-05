@@ -39,7 +39,9 @@ TaskDefinition.prototype.depends = function(names) {
   var ownDep;
 
   // add some dependencies
-  this._deps = this._deps.concat(names || []).concat(Array.prototype.slice.call(arguments, 1));
+  this._deps = this._deps
+    .concat(names || [])
+    .concat(Array.prototype.slice.call(arguments, 1));
 
   // remove any dependencies for this module name
   while ((ownDep = this._deps.indexOf(this.name)) >= 0) {
@@ -80,7 +82,6 @@ TaskDefinition.prototype.isValid = function() {
 **/
 TaskDefinition.prototype.unresolved = function(deep) {
   var missing = this._deps.filter(registry.missing);
-  var deps;
 
   if (deep) {
     this._deps.map(registry.get).filter(Boolean).forEach(function(dep) {

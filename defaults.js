@@ -8,11 +8,10 @@ module.exports = function(name, value) {
   // the specified default value
   if (typeof name == 'string' || (name instanceof String)) {
     if (value) {
-      return defaults[name] = value;
+      defaults[name] = value;
     }
-    else {
-      return defaults[name];
-    }
+
+    return defaults[name];
   }
   else if (typeof name == 'object') {
     defaults = name;

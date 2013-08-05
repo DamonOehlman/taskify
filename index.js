@@ -1,16 +1,11 @@
 /* jshint node: true */
 'use strict';
 
-var async = require('async');
-var _ = require('underscore');
-var eve = require('eve');
-
 // define the task registry
 var registry = require('./registry');
 var taskCounter = 1;
 var defaults = require('./defaults');
 var TaskDefinition = require('./definition');
-var TaskProxy = require('./proxy');
 var ExecutionContext = require('./context');
 
 
@@ -19,7 +14,6 @@ var ExecutionContext = require('./context');
 **/
 var taskify = module.exports = function(name, opts, runner) {
   var task;
-  var baseRunner;
 
   // handle the noopts case
   if (typeof opts == 'function') {
@@ -35,14 +29,14 @@ var taskify = module.exports = function(name, opts, runner) {
 
   // create the task instance
   // and save the new task instance to the registry
-  task = registry.put(name, TaskDefinition(name, opts));
+  task = registry.put(name, new TaskDefinition(name, opts));
 
   // bind the exec function to the runner instance
   task.runner = runner;
 
   // return the task instance
   return task;
-}
+};
 
 /**
   ## taskify.defaults
@@ -90,8 +84,9 @@ taskify.prepare = function(target) {
     // execute the task with the specified args
     proxy = new ExecutionContext().exec(tmpTask, args);
 
-    // if we have a callback defined then attach it to the complete event of the proxy
-    if (callback) { 
+    // if we have a callback defined then attach it to the complete event 
+    // of the proxy
+    if (callback) {
       proxy.once('complete', callback);
     }
 
@@ -120,7 +115,7 @@ taskify.select = function(target) {
 
   // if the temporary task is not valid, then also throw an error
   if (! tmpDef.isValid(missingDeps)) {
-    var error = new Error('Unable to select task, unresolved dependencies: [' + 
+    var error = new Error('Unable to select task, unresolved dependencies: [' +
          missingDeps.join(', ') + ']');
 
     // add the missing dependencies array to the error
