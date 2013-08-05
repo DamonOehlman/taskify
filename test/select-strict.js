@@ -1,17 +1,22 @@
-var assert = require('assert'),
-    taskify = require('../'),
-    targetValue,
-    taskRunner;
+var test = require('tape');
+var taskify = require('..');
 
-describe('selectStrict tests', function() {
-    before(taskify.reset);
-    
-    it('should be able to define a task with a missing dependency', function() {
-        taskify('b', ['a'], function() {
-        });
-    });
+test('reset', function(t) {
+  t.plan(1);
+  t.ok(taskify.reset(), 'reset');
+});
 
-    it('should raise an exception when attempting to selectStrict the defined task', function() {
-        assert.throws(taskify.select.bind(null, 'b'));
-    });
+test('define task with missing dep', function(t) {
+  t.plan(1);
+  taskify('b', ['a'], function() {
+  });
+
+  t.ok(taskify.get('b'), 'b defined');
+});
+
+test('raise an exception when attempting select strict b', function(t) {
+  t.plan(1);
+  t.throws(function() {
+    taskify.select('b');
+  }, 'threw expected error');
 });

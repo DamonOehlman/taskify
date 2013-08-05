@@ -2,6 +2,7 @@
 'use strict';
 
 var defaults = require('./defaults');
+var registry = require('./registry');
 var _ = require('underscore');
 
 /**
@@ -27,6 +28,7 @@ function TaskDefinition(name, opts) {
   // allow a fallback task to be specified
   this._fallback = opts.fallback || defaults.fallback;
 }
+
 
 module.exports = TaskDefinition;
 
@@ -60,22 +62,22 @@ TaskDefinition.prototype.depends = function(names) {
   of the error.
 
 **/
-TaskDefinition.prototype.isValid = function(missingDeps) {
-  var valid = true;
+TaskDefinition.prototype.isValid = function() {
+  var missing = this.unresolved();
 
-  // iterate through the dependencies and find any that are not defined
-  this._deps.forEach(function(taskName) {
-    var dep = taskify.get(taskName);
+  // if we have no missing deps, check next level down
+  if (missing.length === 0) {
+    return this._deps.map(registry.get).filter(function(dep) {
+      return dep.isValid();
+    }).length === this._deps.length;
+  }
+};
 
-    // update the valid flag
-    valid = valid && (typeof dep != 'undefined') && dep.isValid(missingDeps);
+/**
+  ### unresolved()
 
-    // if the dependency was not found, and we have a missing deps array
-    // then add the name to the array
-    if ((! dep) && missingDeps && typeof missingDeps.push == 'function') {
-      missingDeps.push(taskName);
-    }
-  });
-
-  return valid;
+  Return the names of any unresolved dependencies
+**/
+TaskDefinition.prototype.unresolved = function(deep) {
+  return this._deps.filter(registry.missing);
 };

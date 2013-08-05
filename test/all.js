@@ -1,5 +1,6 @@
 require('./args');
-require('./async');
+require('./exec-sync');
+require('./exec-async');
 require('./error-fallbacks');
 require('./errors');
 require('./eve');
@@ -7,3 +8,4 @@ require('./not-found');
 require('./promises-q');
 require('./promises-when');
 require('./results');
+require('./select-strict');

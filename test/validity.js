@@ -1,37 +1,52 @@
-describe('task validity tests', function() {
-    var expect = require('expect.js'),
-        _ = require('underscore'),
-        taskify = require('../taskify');
+var test = require('tape');
+var taskify = require('..');
 
-    before(taskify.reset);
+test('reset', function(t) {
+  t.plan(1);
+  t.ok(taskify.reset(), 'reset');
+});
 
-    it('should be able to define a task with an unknown dependency', function() {
-        taskify('b', ['a'], function() {});
-    });
+test('register b', function(t) {
+  t.plan(1);
+  taskify('b', ['a'], function() {});
+  t.ok(taskify.get('b'), 'b registered');
+});
 
-    it('should know that task b is not valid', function() {
-        expect(taskify.get('b').isValid()).to.not.be.ok();
-    });
+test('b fails validity check', function(t) {
+  var task;
 
-    it('should know that task b is not valid, and a is unresolved', function() {
-        var unresolvedDeps = [];
+  t.plan(2);
+  task = taskify.get('b');
 
-        expect(taskify.get('b').isValid(unresolvedDeps)).to.not.be.ok();
-        expect(unresolvedDeps).to.contain('a');
-    });
+  t.ok(task, 'got task');
+  t.notOk(task.isValid(), 'task not valid');
+});
 
-    it('should be able to define a higher level task with unresolved dependencies', function() {
-        taskify('c', ['b'], function() {});
-    });
+test('b reports unresolved dependencies', function(t) {
+  t.plan(2);
+  t.deepEqual(taskify.get('b').unresolved(), ['a']);
+  t.notOk(taskify.get('b').isValid(), 'not valid');
+});
 
-    it('should know that task c is not valid', function() {
-        expect(taskify.get('c').isValid()).to.not.be.ok();
-    });
+test('define c - with dependencies on b', function(t) {
+  t.plan(1);
+  taskify('c', ['b'], function() {});
+  t.ok(taskify.get('c'), 'c defined');
+});
 
-    it('should know that task c is not valid, and a is unresolved', function() {
-        var unresolvedDeps = [];
+test('c not valid, but resolved', function(t) {
+  var c;
 
-        expect(taskify.get('c').isValid(unresolvedDeps)).to.not.be.ok();
-        expect(unresolvedDeps).to.contain('a');
-    });
+  t.plan(3);
+  t.ok(c = taskify.get('c'), 'found c');
+  t.deepEqual(c.unresolved(), [], 'no unresolved deps for c');
+  t.notOk(c.isValid(), 'not valid (b missing deps)');
+});
+
+test('c unresolved (deep check) returns a', function(t) {
+  var c;
+
+  t.plan(2);
+  t.ok(c = taskify.get('c'), 'found c');
+  t.deepEqual(c.unresolved(true), ['a'], 'found a missing');
 });
