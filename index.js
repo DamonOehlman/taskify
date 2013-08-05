@@ -141,9 +141,9 @@ var ExecutionContext = require('./context');
 
 
 /**
-  # Taskify Reference
+  ## Taskify Reference
 
-  ## taskify(name, opts, runner)
+  ### taskify(name, opts, runner)
 **/
 var taskify = module.exports = function(name, opts, runner) {
   var task;
@@ -172,21 +172,21 @@ var taskify = module.exports = function(name, opts, runner) {
 };
 
 /**
-  ## taskify.defaults
+  ### taskify.defaults
 
   Update the defaults for taskify
 **/
 taskify.defaults = defaults;
 
 /**
-  ## taskify.get
+  ### taskify.get
 
   Get a task by name
 **/
 taskify.get = registry.get;
 
 /**
-  ## taskify.prepare
+  ### taskify.prepare
 
   Prepare task(s) to execute, returning a function that will accept arguments
   that will be passed through to the tasks
@@ -228,7 +228,7 @@ taskify.prepare = function(target) {
 };
 
 /**
-  ## taskify.select
+  ### taskify.select
 
   The select function passes control through to the `taskify.prepare`
   function, but only once it has validated that task dependencies have been
@@ -260,14 +260,14 @@ taskify.select = function(target) {
 };
 
 /**
-  ## taskify.reset
+  ### taskify.reset
 
   Reset the registry - clear existing task definitions.
 **/
 taskify.reset = registry.reset;
 
 /**
-  ## taskify.run
+  ### taskify.run
 **/
 taskify.run = function(target) {
   return taskify.prepare(target).apply(
