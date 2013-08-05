@@ -83,7 +83,7 @@ TaskDefinition.prototype.unresolved = function(deep) {
   var deps;
 
   if (deep) {
-    this._deps.map(registry.get).forEach(function(dep) {
+    this._deps.map(registry.get).filter(Boolean).forEach(function(dep) {
       missing = missing.concat(dep.unresolved(true));
     });
   }
