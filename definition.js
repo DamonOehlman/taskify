@@ -79,5 +79,14 @@ TaskDefinition.prototype.isValid = function() {
   Return the names of any unresolved dependencies
 **/
 TaskDefinition.prototype.unresolved = function(deep) {
-  return this._deps.filter(registry.missing);
+  var missing = this._deps.filter(registry.missing);
+  var deps;
+
+  if (deep) {
+    this._deps.map(registry.get).forEach(function(dep) {
+      missing = missing.concat(dep.unresolved(true));
+    });
+  }
+
+  return missing;
 };
