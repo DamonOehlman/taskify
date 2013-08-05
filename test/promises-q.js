@@ -1,6 +1,6 @@
 var test = require('tape');
 var taskify = require('..');
-var when = require('when');
+var q = require('q');
 
 require('./helpers/prepare-tasks');
 
@@ -8,7 +8,7 @@ test('use q', function(t) {
   t.plan(2);
 
   taskify.defaults({
-    promiseLib: require('when')
+    promiseLib: require('q')
   });
 
   t.ok(taskify.defaults('promiseLib'), 'have a promise lib');
@@ -28,7 +28,7 @@ test('run tasks in parallel using promises', function(t) {
   });
 
   t.plan(1);
-  when.all(promises).then(function() {
+  q.all(promises).then(function() {
     t.pass('both tasks completed');
   });
 });

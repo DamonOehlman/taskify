@@ -1,6 +1,7 @@
 /* jshint node: true */
 'use strict';
 
+var defaults = require('./defaults');
 var proxyCounter = 1;
 var registry = require('./registry');
 var eve = require('eve');
@@ -148,27 +149,29 @@ Object.defineProperty(TaskProxy.prototype, 'promise', {
   get: function() {
     var proxy = this;
     var deferred;
+    var plib = defaults('promiseLib');
 
     // memoize
     if (this._deferred) return this._deferred.promise;
 
+
     // create the deferred object that we will resolve or reject 
     // based on task completion
-    deferred = this._deferred = require(_defaults.promiseLib || 'q').defer();
+    deferred = this._deferred = (plib ? plib.defer() : null);
 
     // handle the complete event
     this.once('complete', function(err) {
-        // reset the deferred member of the proxy
-        proxy._deferred = undefined;
+      // reset the deferred member of the proxy
+      proxy._deferred = undefined;
 
-        // if we have an error reject the promise
-        if (err) return deferred.reject(err);
+      // if we have an error reject the promise
+      if (err) return deferred.reject(err);
 
-        // otherwise resolve the promise
-        deferred.resolve.apply(
-          deferred,
-          Array.prototype.slice.call(arguments, 1)
-        );
+      // otherwise resolve the promise
+      deferred.resolve.apply(
+        deferred,
+        Array.prototype.slice.call(arguments, 1)
+      );
     });
 
     return deferred.promise;
@@ -176,7 +179,7 @@ Object.defineProperty(TaskProxy.prototype, 'promise', {
 });
 
 ['on', 'once'].forEach(function(bindingName) {
-    TaskProxy.prototype[bindingName] = function(eventName, handler) {
-        eve[bindingName]('taskify.' + eventName + '.' + this.id, handler);
-    };
+  TaskProxy.prototype[bindingName] = function(eventName, handler) {
+    eve[bindingName]('taskify.' + eventName + '.' + this.id, handler);
+  };
 });

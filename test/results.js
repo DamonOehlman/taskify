@@ -1,97 +1,107 @@
-describe('results capture tests', function() {
-    var expect = require('expect.js'),
-        eve = require('eve'),
-        _ = require('underscore'),
-        task = require('../taskify');
+var test = require('tape');
+var taskify = require('..');
 
-    before(task.reset);
+test('reset', function(t) {
+  t.plan(1);
+  t.ok(taskify.reset(), 'reset');
+});
 
-    it('should be able to define a task', function() {
-        task('a', function() {
-            return 5;
-        });
-    });
+test('define task', function(t) {
+  t.plan(1);
+  taskify('a', function() {
+    return 5;
+  });
 
-    it('should be able to capture the results from the task execution', function(done) {
-        task.run('a').once('complete', function(err) {
-            expect(err).to.not.be.ok();
+  t.ok(taskify.get('a'), 'have task');
+});
 
-            expect(this.context.results).to.be.ok();
-            expect(this.context.results.a).to.be.equal(5);
-            done();
-        });
-    });
+test('capture results from running a', function(t) {
+  t.plan(3);
+  taskify.run('a').once('complete', function(err) {
+    t.ifError(err);
+    t.ok(this.context.results, 'have results object');
+    t.equal(this.context.results.a, 5);
+  });
+});
 
-    it('should be able redefine task a to return a different result', function() {
-        task('a', function() {
-            return 10;
-        });
-    });
+test('redefine task a', function(t) {
+  t.plan(1);
+  taskify('a', function() {
+    return 10;
+  });
 
-    it('should capture the new result after task execution', function(done) {
-        task.run('a').once('complete', function(err) {
-            expect(err).to.not.be.ok();
+  t.ok(taskify.get('a'), 'have task');
+});
 
-            expect(this.context.results).to.be.ok();
-            expect(this.context.results.a).to.be.equal(10);
-            done();
-        });
-    });
+test('capture new results from running a', function(t) {
+  t.plan(3);
+  taskify.run('a').once('complete', function(err) {
+    t.ifError(err);
+    t.ok(this.context.results, 'have results object');
+    t.equal(this.context.results.a, 10);
+  });
+});
 
-    it('should be able to define an async task that produces a result', function() {
-        task('a', function() {
-            var done = this.async();
+test('redefine task a to async', function(t) {
+  t.plan(1);
+  taskify('a', function() {
+    var done = this.async();
 
-            setTimeout(function() {
-                done(null, 5);
-            }, 10);
-        });
-    });
+    setTimeout(function() {
+      done(null, 15);
+    }, 50);
+  });
 
-    it('should be able to capture the async result of the task execution', function(done) {
-        task.run('a').once('complete', function(err) {
-            expect(err).to.not.be.ok();
+  t.ok(taskify.get('a'), 'have task');
+});
 
-            expect(this.context.results).to.be.ok();
-            expect(this.context.results.a).to.be.equal(5);
-            done();
-        });
-    });
+test('capture results from running a', function(t) {
+  t.plan(3);
+  taskify.run('a').once('complete', function(err) {
+    t.ifError(err);
+    t.ok(this.context.results, 'have results object');
+    t.equal(this.context.results.a, 15);
+  });
+});
 
-    it('should be able to return extra args in the async done call', function() {
-        task('a', function() {
-            var done = this.async();
+test('redefine a to async with additional args', function(t) {
+  t.plan(1);
+  taskify('a', function() {
+    var done = this.async();
 
-            setTimeout(function() {
-                done(null, 5, 10);
-            }, 10);
-        });
-    });
+    setTimeout(function() {
+      done(null, 5, 10);
+    }, 10);
+  });
 
-    it('should be able to capture multiple results passed through the async done call as an array', function(done) {
-        task.run('a').once('complete', function(err) {
-            expect(err).to.not.be.ok();
+  t.ok(taskify.get('a'), 'task a defined');
+});
 
-            expect(this.context.results).to.be.ok();
-            expect(this.context.results.a).to.be.eql([5, 10]);
-            done();
-        });
-    });
+test('capture two results from running a', function(t) {
+  t.plan(3);
+  taskify.run('a').once('complete', function(err) {
+    t.ifError(err);
+    t.ok(this.context.results, 'have results object');
+    t.deepEqual(this.context.results.a, [5, 10]);
+  });
+});
 
-    it('should be able to define a second function to capture results for', function() {
-        task('b', ['a'], function() {
-            return 'hello';
-        });
-    });
+test('define b', function(t) {
+  t.plan(1);
+  taskify('b', ['a'], function() {
+    return 'hello';
+  });
 
-    it('should be able to exec b (depends on a) and capture both results', function(done) {
-        task.run('b').once('complete', function(err) {
-            expect(err).to.not.be.ok();
+  t.ok(taskify.get('b'), 'b defined');
+});
 
-            expect(this.context.results).to.be.ok();
-            expect(this.context.results.a).to.be.eql([5, 10]);
-            expect(this.context.results.b).to.be.equal('hello');
-            done();
-        });
-    });
+test('run b and capture results for a and b', function(t) {
+  t.plan(4);
+
+  taskify.run('b').once('complete', function(err) {
+    t.ifError(err);
+    t.ok(this.context.results, 'have results object');
+    t.deepEqual(this.context.results.a, [5, 10]);
+    t.equal(this.context.results.b, 'hello');
+  });
 });

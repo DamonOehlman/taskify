@@ -1,21 +1,19 @@
-describe('async execution tests', function() {
-    var expect = require('expect.js'),
-        eve = require('eve'),
-        _ = require('underscore'),
-        taskify = require('../taskify');
+var test = require('tape');
+var taskify = require('..');
 
-    before(taskify.reset);
+test('reset', function(t) {
+  t.plan(1);
+  t.ok(taskify.reset(), 'reset ok');
+});
 
-    it('should fail gracefull looking for a non-existant task', function() {
-        var task = taskify.get('a');
+test('cannot find a', function(t) {
+  t.plan(1);
+  t.notOk(taskify.get('a'), 'could not find a, as expected');
+});
 
-        expect(task).not.to.be.ok();
-    });
-
-    it('should handle running a non-existant task intelligently', function(done) {
-        taskify.run('a').once('complete', function(err) {
-            expect(err instanceof Error).to.be.ok();
-            done();
-        });
-    });
+test('running non-existant task returns an error', function(t) {
+  t.plan(1);
+  taskify.run('a').once('complete', function(err) {
+    t.ok(err instanceof Error, 'received expected error attempting to run a');
+  });
 });

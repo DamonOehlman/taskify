@@ -49,9 +49,7 @@ var taskify = module.exports = function(name, opts, runner) {
 
   Update the defaults for taskify
 **/
-taskify.defaults = function(opts) {
-  _defaults = _.clone(opts);
-};
+taskify.defaults = defaults;
 
 /**
   ## taskify.get

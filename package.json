@@ -15,7 +15,8 @@
   },
   "devDependencies": {
     "tape": "~1.0.4",
-    "q": "~0.9.6"
+    "q": "~0.9.6",
+    "when": "~2.2.1"
   },
   "repository": {
     "type": "git",
