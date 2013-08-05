@@ -29,6 +29,7 @@
     "url": "http://github.com/DamonOehlman/taskify/issues"
   },
   "scripts": {
+    "gendocs": "sourcecat | emu > README.md",
     "lint": "jshint *.js",
     "test": "node test/all.js"
   },
