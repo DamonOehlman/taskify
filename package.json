@@ -22,6 +22,9 @@
     "type": "git",
     "url": "git://github.com/DamonOehlman/taskify.git"
   },
+  "testling": {
+    "files": "test/all.js"
+  },
   "bugs": {
     "url": "http://github.com/DamonOehlman/taskify/issues"
   },
