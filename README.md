@@ -2,14 +2,9 @@
 
 This is a simple task execution helper that is heavily influenced from
 [jake](https://github.com/mde/jake) and
-[grunt](https://github.com/gruntjs/grunt).  It's kind of like jake but 
+[grunt](https://github.com/gruntjs/grunt).  It's kind of like jake but
 without the build goodies, and designed to work in the browser as well
 as node.
-
-[
-![Build Status]
-(https://travis-ci.org/DamonOehlman/taskify.png?branch=master)
-](https://travis-ci.org/DamonOehlman/taskify)
 
 ## Example Usage
 
@@ -17,7 +12,7 @@ Define a task `a`:
 
 ```js
 taskify('a', function() {
-  console.log('a'); 
+  console.log('a');
 });
 ```
 
@@ -25,7 +20,7 @@ Then define another task that relies on task `a`:
 
 ```js
 taskify('b', ['a'], function() {
-  console.log('b'); 
+  console.log('b');
 });
 ```
 
@@ -50,7 +45,7 @@ the way you would do this in a grunt task:
 ```js
 taskify('c', function() {
   // call the async method of the task (passed to the runner as this)
-  var done = this.async(); 
+  var done = this.async();
 
   // when the task has been completed call done
   // the first argument is reserved for an error (if one occured)
@@ -65,13 +60,13 @@ Or a slightly less contrived example:
 
 ```js
 taskify('load-data', function() {
-  fs.readFile(path.resolve('data.txt'), 'utf8', this.async()); 
+  fs.readFile(path.resolve('data.txt'), 'utf8', this.async());
 });
 ```
 
 ## Capturing Result Data
 
-When you call the `taskify.run` function, Taskify creates a 
+When you call the `taskify.run` function, Taskify creates a
 new [ExecutionContext](/context.js) for the task dependency tree that will 
 be executed.  This execution context is not persistent though and only
 lasts until the requested tasks have completed their execution (or you
@@ -85,7 +80,7 @@ our `load-data` task from before:
 taskify.run('load-data').on('complete', function(err) {
   if (err) return;
 
-  console.log('loaded data: '  + this.context.results['load-data']); 
+  console.log('loaded data: '  + this.context.results['load-data']);
 });
 ```
 
@@ -97,7 +92,7 @@ you can implement eve handlers to capture the complete events also:
 eve.on('taskify.complete.load-data', function(err) {
   if (err) return;
 
-  console.log('loaded data: '  + this.context.results['load-data']); 
+  console.log('loaded data: '  + this.context.results['load-data']);
 });
 ```
 
