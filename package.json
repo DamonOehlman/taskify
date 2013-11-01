@@ -10,17 +10,17 @@
   "version": "1.0.0",
   "dependencies": {
     "async": "~0.2.9",
-    "eve": "git://github.com/adobe-webplatform/eve.git",
+    "eve": "~0.4.1",
     "underscore": "1.5.x"
   },
   "devDependencies": {
-    "tape": "~1.0.4",
-    "q": "~0.9.6",
-    "when": "~2.2.1"
+    "tape": "~2.1.0",
+    "q": "~0.9.7",
+    "when": "~2.5.1"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/DamonOehlman/taskify.git"
+    "url": "https://github.com/DamonOehlman/taskify.git"
   },
   "testling": {
     "files": "test/all.js"
@@ -29,9 +29,19 @@
     "url": "http://github.com/DamonOehlman/taskify/issues"
   },
   "scripts": {
-    "gendocs": "sourcecat | emu > README.md",
+    "gendocs": "gendocs > README.md",
     "lint": "jshint *.js",
     "test": "node test/all.js"
   },
-  "contributors": []
+  "main": "index.js",
+  "directories": {
+    "example": "examples",
+    "test": "test"
+  },
+  "keywords": [
+    "async",
+    "task-driven",
+    "task-based"
+  ],
+  "license": "MIT"
 }
