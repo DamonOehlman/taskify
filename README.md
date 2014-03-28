@@ -9,10 +9,11 @@ as node.
 
 [![NPM](https://nodei.co/npm/taskify.png)](https://nodei.co/npm/taskify/)
 
-[![Build Status](https://travis-ci.org/DamonOehlman/taskify.png?branch=master)](https://travis-ci.org/DamonOehlman/taskify)
+[![Build Status](https://img.shields.io/travis/DamonOehlman/taskify.svg?branch=master)](https://travis-ci.org/DamonOehlman/taskify)
 
 [![browser support](https://ci.testling.com/DamonOehlman/taskify.png)](https://ci.testling.com/DamonOehlman/taskify)
 
+![unstable](https://img.shields.io/badge/stability-unstable-yellowgreen.svg)
 
 ## Example Usage
 
@@ -242,7 +243,7 @@ Return whether or not the task is missing from the registry
 
 ### MIT
 
-Copyright (c) 2013 Damon Oehlman <damon.oehlman@sidelab.com>
+Copyright (c) 2014 Damon Oehlman <damon.oehlman@sidelab.com>
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
