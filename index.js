@@ -14,10 +14,21 @@ var FastMap = require('collections/fast-map');
 
   ## Example Usage
 
-  Define a task `a`:
+  __NOTE:__ From the `2.0` release of taskify has been redesigned to isolate
+  the task registry into well defined scopes.  As such a new _instance_ of
+  taskify needs to be created when requiring the module.
+
+  The first step with using taskify is to require the module and create a
+  new task registry scope:
 
   ```js
-  taskify('a', function() {
+  var task = require('taskify')();
+  ```
+
+  Then you can start defining tasks:
+
+  ```js
+  task('a', function() {
     console.log('a');
   });
   ```
@@ -25,7 +36,7 @@ var FastMap = require('collections/fast-map');
   Then define another task that relies on task `a`:
 
   ```js
-  taskify('b', ['a'], function() {
+  task('b', ['a'], function() {
     console.log('b');
   });
   ```
@@ -33,7 +44,7 @@ var FastMap = require('collections/fast-map');
   Run task b:
 
   ```js
-  taskify.run('b');
+  task.run('b');
   ```
 
   Which would generate the following output:
@@ -49,7 +60,7 @@ var FastMap = require('collections/fast-map');
   the way you would do this in a grunt task:
 
   ```js
-  taskify('c', function() {
+  task('c', function() {
     // call the async method of the task (passed to the runner as this)
     var done = this.async();
 
@@ -65,14 +76,14 @@ var FastMap = require('collections/fast-map');
   Or a slightly less contrived example:
 
   ```js
-  taskify('load-data', function() {
+  task('load-data', function() {
     fs.readFile(path.resolve('data.txt'), 'utf8', this.async());
   });
   ```
 
   ## Capturing Result Data
 
-  When you call the `taskify.run` function, Taskify creates a
+  When you call the `task.run` function, Taskify creates a
   new [ExecutionContext](/context.js) for the task dependency tree that will 
   be executed.  This execution context is not persistent though and only
   lasts until the requested tasks have completed their execution (or you
@@ -83,7 +94,7 @@ var FastMap = require('collections/fast-map');
   our `load-data` task from before:
 
   ```js
-  taskify.run('load-data').on('complete', function(err) {
+  task.run('load-data').on('complete', function(err) {
     if (err) return;
 
     console.log('loaded data: '  + this.context.results['load-data']);
@@ -104,21 +115,21 @@ var FastMap = require('collections/fast-map');
 
   ## Argument Passing
 
-  When running a task using the `taskify.run` function (or by running the
-  bound function returned from a `taskify.select`) call, you can supply
+  When running a task using the `task.run` function (or by running the
+  bound function returned from a `task.select`) call, you can supply
   arguments that will be passed to that task handler **and** all precondition
   tasks.
 
   As an example, let's pass `console.log` as a task handler:
 
   ```js
-  taskify('log', console.log);
+  task('log', console.log);
   ```
 
   And then run the task passing through the message arguments:
 
   ```js
-  taskify.run('log', 'Hi there', { test: true });
+  task.run('log', 'Hi there', { test: true });
   ```
 
   This would generate the following output:
