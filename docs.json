@@ -2,8 +2,8 @@
   "badges": {
     "nodeico": true,
     "travis": true,
-    "testling": true,
-    "stability": "unstable"
+    "stability": "unstable",
+    "testling": true
   },
 
   "license": {}
