@@ -53,7 +53,7 @@ module.exports = function(registry, opts) {
     var task = this;
     var args = Array.prototype.slice.call(arguments);
     var taskResult = args.length > 2 ? args.slice(1) : args[1];
-    var fallbackDef = registry[this.fallback];
+    var fallbackDef = registry.get(this.fallback);
     var fallbackProxy;
 
     // if we received an error, then add this to the context error stack
@@ -140,7 +140,7 @@ module.exports = function(registry, opts) {
     get: function() {
       var proxy = this;
       var deferred;
-      var plib = (opts || {}).promiseLib || 'Q';
+      var plib = (opts || {}).promise || require('q');
 
       // memoize
       if (this._deferred) {

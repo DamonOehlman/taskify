@@ -1,6 +1,8 @@
 /* jshint node: true */
 'use strict';
 
+var FastMap = require('collections/fast-map');
+
 /**
   # Taskify
 
@@ -136,10 +138,10 @@ module.exports = function(opts) {
   // create the object hash for the registry, allow provision of an existing
   // object that can be used in the registry in the case we want to unify
   // tasks
-  var registry = (opts || {}).registry || {};
+  var registry = (opts || {}).registry || new FastMap();
 
   // create the task definition constructor
-  var TaskDefinition = require('./definition')(opts);
+  var TaskDefinition = require('./definition')(registry, opts);
 
   // define the ExecutionContext constructor
   var ExecutionContext = require('./context')(registry, TaskDefinition, opts);
@@ -171,7 +173,7 @@ module.exports = function(opts) {
 
     // create the task instance
     // and save the new task instance to the registry
-    task = registry[name] = new TaskDefinition(name, opts);
+    registry.set(name, task = new TaskDefinition(name, opts));
 
     // bind the exec function to the runner instance
     task.runner = runner;
@@ -186,9 +188,7 @@ module.exports = function(opts) {
 
     Retrieve a task from the registry.
   **/
-  task.get = function(name) {
-    return registry[name];
-  }
+  task.get = registry.get.bind(registry);
 
 
   /**
@@ -262,7 +262,7 @@ module.exports = function(opts) {
       throw error;
     }
 
-    return taskify.prepare.apply(this, arguments);
+    return task.prepare.apply(this, arguments);
   };
 
   /**

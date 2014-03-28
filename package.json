@@ -6,7 +6,8 @@
   "dependencies": {
     "async": "~0.2.10",
     "eve": "~0.4.1",
-    "underscore": "~1.6.0"
+    "underscore": "~1.6.0",
+    "collections": "^1.0.2"
   },
   "devDependencies": {
     "tape": "^2.12.0",

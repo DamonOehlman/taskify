@@ -3,8 +3,10 @@
 
 var _ = require('underscore');
 
-module.exports = function(defaults) {
+module.exports = function(registry, defaults) {
   var deps = (defaults || {}).deps || [];
+  var registryGet = registry.get.bind(registry);
+
 
   /**
     ## TaskDefinition
@@ -67,7 +69,7 @@ module.exports = function(defaults) {
 
     // if we have no missing deps, check next level down
     if (missing.length === 0) {
-      return this._deps.map(registry.get).filter(function(dep) {
+      return this._deps.map(registryGet).filter(function(dep) {
         return dep.isValid();
       }).length === this._deps.length;
     }
@@ -79,10 +81,12 @@ module.exports = function(defaults) {
     Return the names of any unresolved dependencies
   **/
   TaskDefinition.prototype.unresolved = function(deep) {
-    var missing = this._deps.filter(registry.missing);
+    var missing = this._deps.filter(function(dep) {
+      return !registry.has(dep);
+    });
 
     if (deep) {
-      this._deps.map(registry.get).filter(Boolean).forEach(function(dep) {
+      this._deps.map(registryGet).filter(Boolean).forEach(function(dep) {
         missing = missing.concat(dep.unresolved(true));
       });
     }

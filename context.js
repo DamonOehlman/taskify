@@ -34,7 +34,7 @@ module.exports = function(registry, TaskDefinition, opts) {
 
     // get the task from the registry (if not a task itself)
     if (typeof target == 'string' || (target instanceof String)) {
-      task = registry[target];
+      task = registry.get(target);
     }
     else if (target instanceof TaskDefinition) {
       task = target;
