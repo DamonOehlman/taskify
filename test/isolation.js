@@ -1,7 +1,7 @@
 var assert = require('assert');
 var eve = require('eve');
 var test = require('tape');
-var taskify = require('..');
+var task = require('..')();
 var _ = require('underscore');
 
 function checkUnique() {
@@ -13,7 +13,7 @@ function runTasks(count, done) {
   var taskNames = [].slice.call(arguments, 2);
 
   for (var ii = 0; ii < count; ii++) {
-    taskify.run(taskNames[ii % taskNames.length]).on('complete', function(err) {
+    task.run(taskNames[ii % taskNames.length]).on('complete', function(err) {
       assert.ifError(err);  
       // increment the completed count
       completedCount += 1;
@@ -27,22 +27,17 @@ function runTasks(count, done) {
   }
 }
 
-test('reset', function(t) {
-  t.plan(1);
-  t.ok(taskify.reset(), 'reset');
-});
-
 test('define sync task', function(t) {
   t.plan(1);
-  taskify('sync', function() {
+  task('sync', function() {
     contexts.push(this.context);
   });
-  t.ok(taskify.get('sync'), 'sync registered');
+  t.ok(task.get('sync'), 'sync registered');
 });
 
 test('define async task', function(t) {
   t.plan(1);
-  taskify('async', function() {
+  task('async', function() {
     var done = this.async();
     var task = this;
 
@@ -51,7 +46,7 @@ test('define async task', function(t) {
         done();
     }, 50);
   });
-  t.ok(taskify.get('async'), 'async registered');
+  t.ok(task.get('async'), 'async registered');
 });
 
 test('generate sync contexts', function(t) {

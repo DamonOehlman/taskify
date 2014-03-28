@@ -1,22 +1,20 @@
 var test = require('tape');
-var taskify = require('..');
 var cannedError = new Error('Something went wrong');
 
-test('callback handler involved synchronously', function(t) {
+test('fallback handler involved synchronously', function(t) {
   var fellback = false;
+  var task = require('../')();
 
-  taskify.reset();
-
-  taskify('a', { fallback: 'c' }, function() {
+  task('a', { fallback: 'c' }, function() {
     return cannedError;
   });
 
-  taskify('c', function() {
+  task('c', function() {
     fellback = true;
   });
 
   t.plan(2);
-  taskify.run('a').on('complete', function(err) {
+  task.run('a').on('complete', function(err) {
     t.ifError(err, 'captured error, did not fallback');
     t.equal(fellback, true);
   });
@@ -24,21 +22,20 @@ test('callback handler involved synchronously', function(t) {
 
 test('pass original args to fallback handler', function(t) {
   var fellback = false;
+  var task = require('../')();
 
-  taskify.reset();
-
-  taskify('a', { fallback: 'c' }, function(value) {
+  task('a', { fallback: 'c' }, function(value) {
     t.equal(value, 5);
     return cannedError;
   });
 
-  taskify('c', function(value) {
+  task('c', function(value) {
     t.equal(value, 5);
     fellback = true;
   });
 
   t.plan(4);
-  taskify.run('a', 5).on('complete', function(err) {
+  task.run('a', 5).on('complete', function(err) {
     t.ifError(err);
     t.equal(fellback, true);
   });

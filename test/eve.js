@@ -1,6 +1,6 @@
 var eve = require('eve');
 var test = require('tape');
-var taskify = require('..');
+var task = require('../')();
 var a, b, c;
 
 function trackTask() {
@@ -8,21 +8,16 @@ function trackTask() {
   setTimeout(this.async(), 50);
 }
 
-test('taskify reset', function(t) {
-  t.plan(1);
-  t.ok(taskify.reset(), 'no tasks');
-});
-
 test('register task a', function(t) {
   t.plan(1);
-  a = taskify('a', ['b'], trackTask);
-  t.ok(taskify.get('a'), 'a registered');
+  a = task('a', ['b'], trackTask);
+  t.ok(task.get('a'), 'a registered');
 });
 
 test('register task b', function(t) {
   t.plan(1);
-  b = taskify('b', trackTask);
-  t.ok(taskify.get('b'), 'b registered');
+  b = task('b', trackTask);
+  t.ok(task.get('b'), 'b registered');
 });
 
 test('exec b, monitor completion via eve', function(t) {
@@ -34,13 +29,13 @@ test('exec b, monitor completion via eve', function(t) {
     t.deepEqual(executed, ['b', 'a']);
   });
 
-  taskify.run('a');
+  task.run('a');
 });
 
 test('register task c', function(t) {
   t.plan(1);
-  a = taskify('c', trackTask);
-  t.ok(taskify.get('c'), 'c registered');
+  a = task('c', trackTask);
+  t.ok(task.get('c'), 'c registered');
 });
 
 test('inject additional dep, monitor completion via eve', function(t) {
@@ -53,5 +48,5 @@ test('inject additional dep, monitor completion via eve', function(t) {
     t.deepEqual(executed, ['c', 'b', 'a']);
   });
 
-  taskify.run('a');  
+  task.run('a');  
 });

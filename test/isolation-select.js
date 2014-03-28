@@ -1,56 +1,51 @@
 var assert = require('assert');
 var test = require('tape');
-var taskify = require('..');
+var task = require('..')();
 var targetValue;
 var taskRunner;
 
-test('reset', function(t) {
-  t.plan(1);
-  t.ok(taskify.reset(), 'reset');
-});
-
 test('register a', function(t) {
   t.plan(1);
-  taskify('a', ['b'], function() {
+  task('a', ['b'], function() {
     assert.equal(arguments[0], targetValue);
   });
 
-  t.ok(taskify.get('a'), 'registered a');
+  t.ok(task.get('a'), 'registered a');
 });
 
 test('register b', function(t) {
   t.plan(1);
-  taskify('b', function() {
+  task('b', function() {
     assert.equal(arguments[0], targetValue);
   });
 
-  t.ok(taskify.get('b'), 'registered b');
+  t.ok(task.get('b'), 'registered b');
 });
 
 test('run with undefined value', function(t) {
   t.plan(1);
-  taskify.run('a', targetValue = undefined).on('complete', function() {
+  task.run('a', targetValue = undefined).on('complete', function() {
     t.pass('completed');
   });
 });
 
 test('run with simple value (5)', function(t) {
   t.plan(1);
-  taskify.run('a', targetValue = 5).on('complete', function() {
+  task.run('a', targetValue = 5).on('complete', function() {
     t.pass('completed');
   });
 });
 
 test('run with simple value (10)', function(t) {
   t.plan(1);
-  taskify.run('a', targetValue = 10).on('complete', function() {
+  task.run('a', targetValue = 10).on('complete', function() {
     t.pass('completed');
   });
 });
 
 test('select the task for deferred execution', function(t) {
   t.plan(1);
-  taskRunner = taskify.select('a');
+  taskRunner = task.select('a');
   t.equal(typeof taskRunner, 'function', 'got task runner');
 });
 

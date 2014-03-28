@@ -1,23 +1,18 @@
 var test = require('tape');
-var taskify = require('..');
-
-test('reset', function(t) {
-  t.plan(1);
-  t.ok(taskify.reset(), 'reset');
-});
+var task = require('..')();
 
 test('define task', function(t) {
   t.plan(1);
-  taskify('a', function() {
+  task('a', function() {
     return 5;
   });
 
-  t.ok(taskify.get('a'), 'have task');
+  t.ok(task.get('a'), 'have task');
 });
 
 test('capture results from running a', function(t) {
   t.plan(3);
-  taskify.run('a').once('complete', function(err) {
+  task.run('a').once('complete', function(err) {
     t.ifError(err);
     t.ok(this.context.results, 'have results object');
     t.equal(this.context.results.a, 5);
@@ -26,16 +21,16 @@ test('capture results from running a', function(t) {
 
 test('redefine task a', function(t) {
   t.plan(1);
-  taskify('a', function() {
+  task('a', function() {
     return 10;
   });
 
-  t.ok(taskify.get('a'), 'have task');
+  t.ok(task.get('a'), 'have task');
 });
 
 test('capture new results from running a', function(t) {
   t.plan(3);
-  taskify.run('a').once('complete', function(err) {
+  task.run('a').once('complete', function(err) {
     t.ifError(err);
     t.ok(this.context.results, 'have results object');
     t.equal(this.context.results.a, 10);
@@ -44,7 +39,7 @@ test('capture new results from running a', function(t) {
 
 test('redefine task a to async', function(t) {
   t.plan(1);
-  taskify('a', function() {
+  task('a', function() {
     var done = this.async();
 
     setTimeout(function() {
@@ -52,12 +47,12 @@ test('redefine task a to async', function(t) {
     }, 50);
   });
 
-  t.ok(taskify.get('a'), 'have task');
+  t.ok(task.get('a'), 'have task');
 });
 
 test('capture results from running a', function(t) {
   t.plan(3);
-  taskify.run('a').once('complete', function(err) {
+  task.run('a').once('complete', function(err) {
     t.ifError(err);
     t.ok(this.context.results, 'have results object');
     t.equal(this.context.results.a, 15);
@@ -66,7 +61,7 @@ test('capture results from running a', function(t) {
 
 test('redefine a to async with additional args', function(t) {
   t.plan(1);
-  taskify('a', function() {
+  task('a', function() {
     var done = this.async();
 
     setTimeout(function() {
@@ -74,12 +69,12 @@ test('redefine a to async with additional args', function(t) {
     }, 10);
   });
 
-  t.ok(taskify.get('a'), 'task a defined');
+  t.ok(task.get('a'), 'task a defined');
 });
 
 test('capture two results from running a', function(t) {
   t.plan(3);
-  taskify.run('a').once('complete', function(err) {
+  task.run('a').once('complete', function(err) {
     t.ifError(err);
     t.ok(this.context.results, 'have results object');
     t.deepEqual(this.context.results.a, [5, 10]);
@@ -88,17 +83,17 @@ test('capture two results from running a', function(t) {
 
 test('define b', function(t) {
   t.plan(1);
-  taskify('b', ['a'], function() {
+  task('b', ['a'], function() {
     return 'hello';
   });
 
-  t.ok(taskify.get('b'), 'b defined');
+  t.ok(task.get('b'), 'b defined');
 });
 
 test('run b and capture results for a and b', function(t) {
   t.plan(4);
 
-  taskify.run('b').once('complete', function(err) {
+  task.run('b').once('complete', function(err) {
     t.ifError(err);
     t.ok(this.context.results, 'have results object');
     t.deepEqual(this.context.results.a, [5, 10]);

@@ -1,25 +1,25 @@
 var test = require('tape');
-var taskify = require('../..');
 
-test('reset', function(t) {
-  t.plan(1);
-  t.ok(taskify.reset(), 'reset ok');
-});
+module.exports = function(opts) {
+  var task = require('../../')(opts);
 
-test('register a', function(t) {
-  t.plan(1);
-  taskify('a', function() {
-    setTimeout(this.async(), 50);
+  test('register a', function(t) {
+    t.plan(1);
+    task('a', function() {
+      setTimeout(this.async(), 50);
+    });
+
+    t.ok(task.get('a'), 'registered');
   });
 
-  t.ok(taskify.get('a'), 'registered');
-});
+  test('register b', function(t) {
+    t.plan(1);
+    task('b', function() {
+      setTimeout(this.async(), 50);
+    });
 
-test('register b', function(t) {
-  t.plan(1);
-  taskify('b', function() {
-    setTimeout(this.async(), 50);
+    t.ok(task.get('b'), 'registered');
   });
 
-  t.ok(taskify.get('b'), 'registered');
-});
+  return task;
+}
