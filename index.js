@@ -160,6 +160,9 @@ module.exports = function(opts) {
   // initialise the task counter
   var taskCounter = 1;
 
+  // should we attempt to pop callbacks?
+  var popCallbacks = (opts || {}).popCallbacks;
+
   /**
 
     ### task(name, opts, runner)
@@ -227,7 +230,7 @@ module.exports = function(opts) {
       // if we have been supplied a function as the last argument
       // then we will assume it is a callback function
       // TODO: investigate making this toggleable with a taskify switch ?
-      if (typeof args[args.length - 1] == 'function') {
+      if (popCallbacks && typeof args[args.length - 1] == 'function') {
         callback = args.pop();
       }
 
