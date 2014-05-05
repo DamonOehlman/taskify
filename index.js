@@ -176,14 +176,17 @@ module.exports = function(opts) {
 
   **/
   task.exec = function(args, callback) {
-    // extract the task name
-    var name = args.splice(0)[0];
-
-    // prepare the task
-    var t = task.get(name);
+    var name;
+    var t;
     var proxy;
 
-    // if we have no task, defined, then report an error
+    // ensure args is an array
+    args = [].concat(args || []);
+
+    // get the task name and then task
+    name = args.splice(0)[0];
+    t = task.get(name);
+
     if (! t) {
       return callback(new Error('could not find task: ' + name));
     }
