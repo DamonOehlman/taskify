@@ -15,3 +15,8 @@ require('./validity');
 
 // test our exec function
 require('./exec-sync');
+require('./exec-async');
+
+// test pull streams integration
+require('./pull-sync');
+require('./pull-async');
