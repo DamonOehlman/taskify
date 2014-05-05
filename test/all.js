@@ -1,6 +1,6 @@
 require('./args');
-require('./exec-sync');
-require('./exec-async');
+require('./run-sync');
+require('./run-async');
 require('./error-fallbacks');
 require('./errors');
 require('./eve');
