@@ -12,7 +12,8 @@
   "devDependencies": {
     "tape": "^2",
     "q": "^1",
-    "when": "^3"
+    "when": "^3",
+    "pull-stream": "^2"
   },
   "repository": {
     "type": "git",
