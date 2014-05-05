@@ -184,7 +184,7 @@ module.exports = function(opts) {
     args = [].concat(args || []);
 
     // get the task name and then task
-    name = args.splice(0)[0];
+    name = args.splice(0, 1)[0];
     t = task.get(name);
 
     if (! t) {
