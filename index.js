@@ -110,26 +110,9 @@ module.exports = function(opts) {
 
     return function() {
       var args = initArgs.concat(Array.prototype.slice.call(arguments));
-      var callback;
-      var proxy;
-
-      // if we have been supplied a function as the last argument
-      // then we will assume it is a callback function
-      // TODO: investigate making this toggleable with a taskify switch ?
-      if (popCallbacks && typeof args[args.length - 1] == 'function') {
-        callback = args.pop();
-      }
 
       // execute the task with the specified args
-      proxy = new ExecutionContext().exec(tmpTask, args);
-
-      // if we have a callback defined then attach it to the complete event
-      // of the proxy
-      if (callback) {
-        proxy.once('complete', callback);
-      }
-
-      return proxy;
+      return new ExecutionContext().exec(tmpTask, args);
     };
   };
 
