@@ -1,7 +1,7 @@
 {
   "name": "taskify",
   "description": "Simple Atomic Task Definition for Node and the Browser",
-  "author": "Damon Oehlman <damon.oehlman@sidelab.com>",
+  "author": "Damon Oehlman <damon.oehlman@gmail.com>",
   "version": "3.0.0",
   "dependencies": {
     "async": "^0.6.2",
