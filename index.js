@@ -188,7 +188,7 @@ module.exports = function(opts) {
     t = task.get(name);
 
     if (! t) {
-      return callback(new Error('could not find task: ' + name));
+      return callback && callback(new Error('could not find task: ' + name));
     }
 
     // create the execution context
