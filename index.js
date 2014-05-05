@@ -14,134 +14,20 @@ var FastMap = require('collections/fast-map');
 
   ## Example Usage
 
-  __NOTE:__ From the `2.0` release of taskify has been redesigned to isolate
-  the task registry into well defined scopes.  As such a new _instance_ of
-  taskify needs to be created when requiring the module.
-
-  The first step with using taskify is to require the module and create a
-  new task registry scope:
-
-  ```js
-  var task = require('taskify')();
-  ```
-
-  Then you can start defining tasks:
-
-  ```js
-  task('a', function() {
-    console.log('a');
-  });
-  ```
-
-  Then define another task that relies on task `a`:
-
-  ```js
-  task('b', ['a'], function() {
-    console.log('b');
-  });
-  ```
-
-  Run task b:
-
-  ```js
-  task.run('b');
-  ```
-
-  Which would generate the following output:
-
-  ```
-  a
-  b
-  ```
+  <<< docs/example-usage.md
 
   ## Asynchronous Behaviour
 
-  Specifying that a task handler behaves asynchronously is very similar to
-  the way you would do this in a grunt task:
-
-  ```js
-  task('c', function() {
-    // call the async method of the task (passed to the runner as this)
-    var done = this.async();
-
-    // when the task has been completed call done
-    // the first argument is reserved for an error (if one occured)
-    // and subsequent arguments will be placed on the context.results object
-    setTimeout(function() {
-      done();
-    }, 1000);
-  });
-  ```
-
-  Or a slightly less contrived example:
-
-  ```js
-  task('load-data', function() {
-    fs.readFile(path.resolve('data.txt'), 'utf8', this.async());
-  });
-  ```
+  <<< docs/async.md
 
   ## Capturing Result Data
 
-  When you call the `task.run` function, Taskify creates a
-  new [ExecutionContext](/context.js) for the task dependency tree that will 
-  be executed.  This execution context is not persistent though and only
-  lasts until the requested tasks have completed their execution (or you
-  capture the reference).
-
-  To capture the results of a task execution you will need to handle the
-  complete event for a particular task.  Let's look at the simple example of
-  our `load-data` task from before:
-
-  ```js
-  task.run('load-data').on('complete', function(err) {
-    if (err) return;
-
-    console.log('loaded data: '  + this.context.results['load-data']);
-  });
-  ```
-
-  Additionally, because Taskify uses
-  [eve](https://github.com/DmitryBaranovskiy/eve) under the hood for eventing,
-  you can implement eve handlers to capture the complete events also:
-
-  ```js
-  eve.on('taskify.complete.load-data', function(err) {
-    if (err) return;
-
-    console.log('loaded data: '  + this.context.results['load-data']);
-  });
-  ```
+  <<< docs/result-data.md
 
   ## Argument Passing
 
-  When running a task using the `task.run` function (or by running the
-  bound function returned from a `task.select`) call, you can supply
-  arguments that will be passed to that task handler **and** all precondition
-  tasks.
+  <<< docs/argument-passing.md
 
-  As an example, let's pass `console.log` as a task handler:
-
-  ```js
-  task('log', console.log);
-  ```
-
-  And then run the task passing through the message arguments:
-
-  ```js
-  task.run('log', 'Hi there', { test: true });
-  ```
-
-  This would generate the following output:
-
-  ```
-  Hi there { test: true }
-  ```
-
-**/
-
-
-/**
   ## Taskify Reference
 
 **/
@@ -237,7 +123,7 @@ module.exports = function(opts) {
       // execute the task with the specified args
       proxy = new ExecutionContext().exec(tmpTask, args);
 
-      // if we have a callback defined then attach it to the complete event 
+      // if we have a callback defined then attach it to the complete event
       // of the proxy
       if (callback) {
         proxy.once('complete', callback);

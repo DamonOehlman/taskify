@@ -57,6 +57,7 @@ a
 b
 ```
 
+
 ## Asynchronous Behaviour
 
 Specifying that a task handler behaves asynchronously is very similar to
@@ -84,10 +85,11 @@ task('load-data', function() {
 });
 ```
 
+
 ## Capturing Result Data
 
 When you call the `task.run` function, Taskify creates a
-new [ExecutionContext](/context.js) for the task dependency tree that will 
+new [ExecutionContext](/context.js) for the task dependency tree that will
 be executed.  This execution context is not persistent though and only
 lasts until the requested tasks have completed their execution (or you
 capture the reference).
@@ -116,6 +118,7 @@ eve.on('taskify.complete.load-data', function(err) {
 });
 ```
 
+
 ## Argument Passing
 
 When running a task using the `task.run` function (or by running the
@@ -140,6 +143,7 @@ This would generate the following output:
 ```
 Hi there { test: true }
 ```
+
 
 ## Taskify Reference
 
