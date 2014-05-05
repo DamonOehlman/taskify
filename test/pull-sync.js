@@ -48,3 +48,27 @@ test('run a + b', function(t) {
     })
   );
 });
+
+test('register double', function(t) {
+  t.plan(1);
+  task('double', function(value) {
+    return value * 2;
+  });
+
+  t.ok(task.get('double'), 'registered double');
+});
+
+test('double a series of values', function(t) {
+  t.plan(2);
+  pull(
+    pull.values([5, 6, 7]),
+    pull.map(function(val) {
+      return ['double', val];
+    }),
+    pull.asyncMap(task.exec),
+    pull.collect(function(err, values) {
+      t.ifError(err);
+      t.deepEqual(values, [10, 12, 14], 'values doubled');
+    })
+  );
+});
