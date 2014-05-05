@@ -197,7 +197,17 @@ module.exports = function(opts) {
     var name = args.splice(0)[0];
 
     // prepare the task
-    var t = task.prepare(name);
+    var t = task.get(name);
+    var proxy;
+
+    // if we have no task, defined, then report an error
+    if (! t) {
+      return callback(new Error('could not find task: ' + name));
+    }
+
+    // create the execution context
+    proxy = new ExecutionContext().exec(t, args);
+    proxy.once('complete', callback);
   };
 
   return task;
