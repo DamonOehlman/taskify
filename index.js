@@ -193,7 +193,13 @@ module.exports = function(opts) {
 
     // create the execution context
     proxy = new ExecutionContext().exec(t, args);
-    proxy.once('complete', callback);
+
+    // if we have been provided a callback, then exec
+    if (typeof callback == 'function') {
+      proxy.once('complete', callback);
+    }
+
+    return proxy;
   };
 
   return task;
