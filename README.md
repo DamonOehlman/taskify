@@ -171,6 +171,18 @@ be thrown.
 
 Run the specified task, with the provided arguments.
 
+alias: `task.spawn`
+
+### task.exec(args, callback)
+
+Using the args specified, run a task and execute the callback once the task
+has completed. The task name is passed in `args[0]` with `args.slice(1)`
+containing any parameters that should be passed to the task when it is
+run.
+
+The `task.exec` function has been optimized for use with a
+[pull-stream](https://github.com/dominictarr/pull-stream) sink.
+
 ## ExecutionContext
 
 ### exec(task, atgs)
@@ -236,7 +248,7 @@ update the taskify defaults.
 
 ### MIT
 
-Copyright (c) 2014 Damon Oehlman <damon.oehlman@sidelab.com>
+Copyright (c) 2014 Damon Oehlman <damon.oehlman@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
