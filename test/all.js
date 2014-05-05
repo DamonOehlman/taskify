@@ -12,3 +12,6 @@ require('./promises-when');
 require('./results');
 require('./select-strict');
 require('./validity');
+
+// test our exec function
+require('./exec-sync');
