@@ -140,7 +140,7 @@ module.exports = function(registry, opts) {
     get: function() {
       var proxy = this;
       var deferred;
-      var plib = (opts || {}).promise || require('q');
+      var plib = (opts || {}).promise;
 
       // memoize
       if (this._deferred) {
