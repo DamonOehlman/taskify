@@ -9,10 +9,9 @@ as node.
 
 [![NPM](https://nodei.co/npm/taskify.png)](https://nodei.co/npm/taskify/)
 
-[![Build Status](https://img.shields.io/travis/DamonOehlman/taskify.svg?branch=master)](https://travis-ci.org/DamonOehlman/taskify)
-![unstable](https://img.shields.io/badge/stability-unstable-yellowgreen.svg)
-
+[![Build Status](https://img.shields.io/travis/DamonOehlman/taskify.svg?branch=master)](https://travis-ci.org/DamonOehlman/taskify) [![unstable](https://img.shields.io/badge/stability-unstable-yellowgreen.svg)](https://github.com/dominictarr/stability#unstable) 
 [![browser support](https://ci.testling.com/DamonOehlman/taskify.png)](https://ci.testling.com/DamonOehlman/taskify)
+
 
 
 ## Example Usage
@@ -248,7 +247,7 @@ update the taskify defaults.
 
 ### MIT
 
-Copyright (c) 2014 Damon Oehlman <damon.oehlman@gmail.com>
+Copyright (c) 2015 Damon Oehlman <damon.oehlman@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
