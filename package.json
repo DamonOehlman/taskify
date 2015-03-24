@@ -10,10 +10,10 @@
     "underscore": "^1.8.2"
   },
   "devDependencies": {
-    "tape": "^2",
+    "pull-stream": "^2",
     "q": "^1",
-    "when": "^3",
-    "pull-stream": "^2"
+    "tape": "^3.5.0",
+    "when": "^3"
   },
   "repository": {
     "type": "git",
