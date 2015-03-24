@@ -10,9 +10,13 @@
     "underscore": "^1.8.2"
   },
   "devDependencies": {
+    "broth": "^1.1.1",
+    "browserify": "^9.0.3",
     "pull-stream": "^2",
     "q": "^1",
+    "tap-spec": "^2.2.2",
     "tape": "^3.5.0",
+    "travis-multirunner": "^1.1.0",
     "when": "^3"
   },
   "repository": {
@@ -20,20 +24,7 @@
     "url": "https://github.com/DamonOehlman/taskify.git"
   },
   "testling": {
-    "files": "test/all.js",
-    "browsers": [
-      "ie/9..latest",
-      "firefox/16..latest",
-      "firefox/nightly",
-      "chrome/22..latest",
-      "chrome/canary",
-      "opera/12..latest",
-      "opera/next",
-      "safari/5.1..latest",
-      "ipad/6.0..latest",
-      "iphone/6.0..latest",
-      "android-browser/4.2..latest"
-    ]
+    "files": "test/all.js"
   },
   "bugs": {
     "url": "http://github.com/DamonOehlman/taskify/issues"
@@ -41,7 +32,8 @@
   "scripts": {
     "gendocs": "gendocs > README.md",
     "lint": "jshint *.js",
-    "test": "node test/all.js"
+    "test": "node test/all.js",
+    "browser-test": "browserify test/all.js | broth ./node_modules/travis-multirunner/start-$BROWSER.sh | tap-spec"
   },
   "main": "index.js",
   "directories": {
