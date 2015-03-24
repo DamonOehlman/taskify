@@ -1,6 +1,6 @@
 var test = require('tape');
 var q = require('q');
-var task = require('./helpers/prepare-tasks')();
+var task  = require('./helpers/prepare-tasks')({ promise: q });
 
 test('run a task and get a promise', function(t) {
   t.plan(1);
