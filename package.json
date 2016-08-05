@@ -10,13 +10,13 @@
     "underscore": "^1.8.2"
   },
   "devDependencies": {
-    "broth": "^1.1.1",
-    "browserify": "^9.0.3",
-    "pull-stream": "^2",
+    "broth": "^2.2.0",
+    "browserify": "^13.1.0",
+    "pull-stream": "^3.4.3",
     "q": "^1",
-    "tap-spec": "^2.2.2",
-    "tape": "^3.5.0",
-    "travis-multirunner": "^1.1.0",
+    "tap-spec": "^4.1.1",
+    "tape": "^4.6.0",
+    "travis-multirunner": "^3.0.1",
     "when": "^3"
   },
   "repository": {
