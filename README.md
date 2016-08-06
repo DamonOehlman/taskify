@@ -1,3 +1,4 @@
+
 # Taskify
 
 This is a simple task execution helper that is heavily influenced from
@@ -9,7 +10,7 @@ as node.
 
 [![NPM](https://nodei.co/npm/taskify.png)](https://nodei.co/npm/taskify/)
 
-[![Build Status](https://img.shields.io/travis/DamonOehlman/taskify.svg?branch=master)](https://travis-ci.org/DamonOehlman/taskify) [![bitHound Score](https://www.bithound.io/github/DamonOehlman/taskify/badges/score.svg)](https://www.bithound.io/github/DamonOehlman/taskify) 
+[![Build Status](https://api.travis-ci.org/DamonOehlman/taskify.svg?branch=master)](https://travis-ci.org/DamonOehlman/taskify) [![bitHound Score](https://www.bithound.io/github/DamonOehlman/taskify/badges/score.svg)](https://www.bithound.io/github/DamonOehlman/taskify) 
 
 ## Example Usage
 
@@ -244,7 +245,7 @@ update the taskify defaults.
 
 ### MIT
 
-Copyright (c) 2015 Damon Oehlman <damon.oehlman@gmail.com>
+Copyright (c) 2016 Damon Oehlman <damon.oehlman@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
